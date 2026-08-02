@@ -50,7 +50,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   useEffect(() => {
-    if (configLoading || !config) return;
+    if (configLoading) return;
+    if (!config) {
+      setIsLoading(false);
+      return;
+    }
 
     const initAuth = async () => {
       try {

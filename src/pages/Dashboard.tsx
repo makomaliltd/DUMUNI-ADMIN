@@ -105,29 +105,29 @@ export default function Dashboard() {
       {/* Statistics Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="总订单数"
+          title={t('dashboard.totalOrders')}
           value={stats?.totalOrders ?? '—'}
           icon={ShoppingCart}
           trend={stats?.ordersTrend}
-          trendLabel="较上月"
+          trendLabel={t('common.month')}
           iconClassName="bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
         />
         <StatCard
-          title="进行中订单"
+          title={t('dashboard.activeOrders')}
           value={activeOrders}
           icon={TrendingUp}
           iconClassName="bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
         />
         <StatCard
-          title="平台佣金"
+          title={t('dashboard.totalRevenue')}
           value={stats ? formatCurrency(stats.totalRevenue) : '—'}
           icon={DollarSign}
           trend={stats?.revenueTrend}
-          trendLabel="较上月"
+          trendLabel={t('common.month')}
           iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
         />
         <StatCard
-          title="待审核"
+          title={t('dashboard.pendingReviews')}
           value={stats?.pendingVerifications ?? '—'}
           icon={ClipboardCheck}
           iconClassName="bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-400"
@@ -137,7 +137,7 @@ export default function Dashboard() {
       {/* Charts Grid */}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Orders Trend */}
-        <ChartCard title="订单趋势" subtitle="最近30天">
+        <ChartCard title={t('dashboard.orderTrend')} subtitle={t('common.last30Days')}>
           {orderTrendLoading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -174,7 +174,7 @@ export default function Dashboard() {
         </ChartCard>
 
         {/* Revenue Trend */}
-        <ChartCard title="收入趋势" subtitle="最近30天">
+        <ChartCard title={t('dashboard.revenueTrend')} subtitle={t('common.last30Days')}>
           {revenueTrendLoading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -211,7 +211,7 @@ export default function Dashboard() {
         </ChartCard>
 
         {/* Top 5 Restaurants */}
-        <ChartCard title="热门餐厅 Top 5" subtitle="按订单数排名">
+        <ChartCard title={t('dashboard.topRestaurants')} subtitle={t('dashboard.byOrderCount')}>
           {topRestaurantsLoading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -241,7 +241,7 @@ export default function Dashboard() {
         </ChartCard>
 
         {/* Order Status Distribution */}
-        <ChartCard title="订单状态分布" subtitle="当前各状态占比">
+        <ChartCard title={t('dashboard.statusDistribution')} subtitle={t('dashboard.statusRatio')}>
           {statusLoading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -288,8 +288,8 @@ export default function Dashboard() {
       <div className="rounded-xl border bg-card p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold">实时活动</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">最新订单、评价与提现</p>
+            <h3 className="text-sm font-semibold">{t('dashboard.recentActivity')}</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t('dashboard.recentActivityDesc')}</p>
           </div>
         </div>
         <ActivityFeed />

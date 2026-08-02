@@ -51,6 +51,9 @@ const en: Dict = {
   'dashboard.topRestaurants': 'Top Restaurants',
   'dashboard.statusDistribution': 'Order Status Distribution',
   'dashboard.recentActivity': 'Recent Activity',
+  'dashboard.recentActivityDesc': 'Latest orders, reviews, and withdrawals',
+  'dashboard.byOrderCount': 'By order count',
+  'dashboard.statusRatio': 'Current status ratio',
   'dashboard.orders': 'orders',
   'dashboard.viewAll': 'View All',
   'dashboard.noData': 'No data available',
@@ -82,6 +85,11 @@ const en: Dict = {
   'common.of': 'of',
   'common.total': 'Total',
   'common.noData': 'No data found',
+  'common.month': 'vs last month',
+  'common.last30Days': 'Last 30 days',
+  'common.last12Months': 'Last 12 months',
+  'common.today': 'Today',
+  'common.thisWeek': 'This week',
 
   // Settings
   'settings.title': 'Platform Settings',
@@ -120,6 +128,8 @@ const en: Dict = {
   'finance.processWithdrawals': 'Process Pending Withdrawals',
   'finance.configureCommission': 'Configure Commission Rate',
   'finance.exportTransactions': 'Export Transaction Records',
+  'finance.byTotalRevenue': 'By total revenue',
+  'finance.incomeSourceDistribution': 'Income source distribution',
 
   // Status labels
   'status.pending': 'Pending',
@@ -175,6 +185,9 @@ const fr: Dict = {
   'dashboard.topRestaurants': 'Top restaurants',
   'dashboard.statusDistribution': 'Répartition des statuts',
   'dashboard.recentActivity': 'Activité récente',
+  'dashboard.recentActivityDesc': 'Dernières commandes, avis et retraits',
+  'dashboard.byOrderCount': 'Par nombre de commandes',
+  'dashboard.statusRatio': 'Répartition actuelle',
   'dashboard.orders': 'commandes',
   'dashboard.viewAll': 'Voir tout',
   'dashboard.noData': 'Aucune donnée disponible',
@@ -206,6 +219,11 @@ const fr: Dict = {
   'common.of': 'sur',
   'common.total': 'Total',
   'common.noData': 'Aucune donnée trouvée',
+  'common.month': 'vs mois dernier',
+  'common.last30Days': '30 derniers jours',
+  'common.last12Months': '12 derniers mois',
+  'common.today': 'Aujourd\'hui',
+  'common.thisWeek': 'Cette semaine',
 
   // Settings
   'settings.title': 'Paramètres de la plateforme',
@@ -244,6 +262,8 @@ const fr: Dict = {
   'finance.processWithdrawals': 'Traiter les retraits en attente',
   'finance.configureCommission': 'Configurer le taux de commission',
   'finance.exportTransactions': 'Exporter les transactions',
+  'finance.byTotalRevenue': 'Par revenu total',
+  'finance.incomeSourceDistribution': 'Répartition des sources de revenus',
 
   // Status labels
   'status.pending': 'En attente',
@@ -299,6 +319,9 @@ const zhCN: Dict = {
   'dashboard.topRestaurants': '热门餐厅',
   'dashboard.statusDistribution': '订单状态分布',
   'dashboard.recentActivity': '最近活动',
+  'dashboard.recentActivityDesc': '最新订单、评价与提现',
+  'dashboard.byOrderCount': '按订单数排名',
+  'dashboard.statusRatio': '当前各状态占比',
   'dashboard.orders': '单',
   'dashboard.viewAll': '查看全部',
   'dashboard.noData': '暂无数据',
@@ -330,6 +353,11 @@ const zhCN: Dict = {
   'common.of': '页，共',
   'common.total': '共',
   'common.noData': '暂无数据',
+  'common.month': '较上月',
+  'common.last30Days': '最近30天',
+  'common.last12Months': '近12个月',
+  'common.today': '今天',
+  'common.thisWeek': '本周',
 
   // Settings
   'settings.title': '平台设置',
@@ -368,6 +396,8 @@ const zhCN: Dict = {
   'finance.processWithdrawals': '处理待审核提现',
   'finance.configureCommission': '配置佣金率',
   'finance.exportTransactions': '导出交易记录',
+  'finance.byTotalRevenue': '按总收入排名',
+  'finance.incomeSourceDistribution': '收入来源分布',
 
   // Status labels
   'status.pending': '待审核',

@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DollarSign, TrendingUp, Clock, Percent, Eye, CheckCircle, XCircle, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const COLORS = ['#FF6B00', '#22c55e', '#3b82f6', '#a855f7', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
@@ -24,12 +25,13 @@ function formatFCFA(n: number) { return n.toLocaleString('fr-FR', { minimumFract
 export default function FinancePage() {
   const [tab, setTab] = useState<'overview' | 'withdrawals' | 'transactions' | 'settings'>('overview');
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const tabs = [
-    { key: 'overview', label: '财务概览', icon: TrendingUp },
-    { key: 'withdrawals', label: '提现管理', icon: Clock },
-    { key: 'transactions', label: '交易记录', icon: DollarSign },
-    { key: 'settings', label: '财务设置', icon: Percent },
+    { key: 'overview', label: t('finance.overview'), icon: TrendingUp },
+    { key: 'withdrawals', label: t('finance.withdrawals'), icon: Clock },
+    { key: 'transactions', label: t('finance.transactions'), icon: DollarSign },
+    { key: 'settings', label: t('finance.settings'), icon: Percent },
   ] as const;
 
   return (
@@ -59,6 +61,7 @@ export default function FinancePage() {
 function FinanceOverview() {
   const { data: overview, isLoading } = useFinanceOverview();
   const { data: restaurants } = useRestaurants({ page: 1, pageSize: 50 });
+  const { t } = useLanguage();
 
   if (isLoading) return <div className="flex items-center justify-center py-20"><div className="animate-spin h-8 w-8 border-4 border-[#FF6B00] border-t-transparent rounded-full" /></div>;
 
@@ -75,14 +78,14 @@ function FinanceOverview() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="总收入" value={formatFCFA(stats.totalRevenue)} icon={DollarSign} trend={12.5} />
-        <StatCard title="本月收入" value={formatFCFA(stats.monthRevenue)} icon={TrendingUp} trend={8.3} />
-        <StatCard title="待处理提现" value={String(stats.pendingWithdrawals)} icon={Clock} />
-        <StatCard title="平台佣金" value={formatFCFA(stats.totalCommission)} icon={Percent} trend={15.2} />
+        <StatCard title={t('finance.totalRevenue')} value={formatFCFA(stats.totalRevenue)} icon={DollarSign} trend={12.5} />
+        <StatCard title={t('finance.monthRevenue')} value={formatFCFA(stats.monthRevenue)} icon={TrendingUp} trend={8.3} />
+        <StatCard title={t('finance.pendingWithdrawals')} value={String(stats.pendingWithdrawals)} icon={Clock} />
+        <StatCard title={t('finance.totalCommission')} value={formatFCFA(stats.totalCommission)} icon={Percent} trend={15.2} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="月度收入趋势" subtitle="近12个月" className="col-span-1">
+        <ChartCard title={t('finance.revenueByMonth')} subtitle={t('common.last12Months')} className="col-span-1">
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={stats.revenueByMonth.length > 0 ? stats.revenueByMonth : mockRevenueByMonth}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -95,7 +98,7 @@ function FinanceOverview() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="餐厅收入 Top 10" subtitle="按总收入排名" className="col-span-1">
+        <ChartCard title={t('finance.revenueByRestaurant')} subtitle={t('finance.byTotalRevenue')} className="col-span-1">
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={stats.revenueByRestaurant.length > 0 ? stats.revenueByRestaurant.slice(0, 10) : mockRevenueByRestaurant} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -109,7 +112,7 @@ function FinanceOverview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="佣金构成" subtitle="收入来源分布">
+        <ChartCard title={t('finance.commissionBreakdown')} subtitle={t('finance.incomeSourceDistribution')}>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie data={stats.commissionBreakdown.length > 0 ? stats.commissionBreakdown : mockCommissionBreakdown}
@@ -126,16 +129,16 @@ function FinanceOverview() {
 
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-4">快速操作</h3>
+            <h3 className="font-semibold mb-4">{t('finance.quickActions')}</h3>
             <div className="space-y-3">
               <Button className="w-full justify-start bg-[#FF6B00] hover:bg-[#e86000] text-white" onClick={() => window.location.href = '/finance?tab=withdrawals'}>
-                <Clock className="h-4 w-4 mr-2" /> 处理待审核提现
+                <Clock className="h-4 w-4 mr-2" /> {t('finance.processWithdrawals')}
               </Button>
               <Button className="w-full justify-start" variant="outline" onClick={() => window.location.href = '/finance?tab=settings'}>
-                <Percent className="h-4 w-4 mr-2" /> 配置佣金率
+                <Percent className="h-4 w-4 mr-2" /> {t('finance.configureCommission')}
               </Button>
               <Button className="w-full justify-start" variant="outline" onClick={() => window.location.href = '/finance?tab=transactions'}>
-                <Download className="h-4 w-4 mr-2" /> 导出交易记录
+                <Download className="h-4 w-4 mr-2" /> {t('finance.exportTransactions')}
               </Button>
             </div>
           </CardContent>
