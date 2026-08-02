@@ -418,4 +418,5 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 4. 运行 `coze start` 启动服务
 #   D U M U N I _ -  
  #   D U M U N I _ -  
+ #   D U M U N I - A D M I N  
  
