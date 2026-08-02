@@ -75,7 +75,7 @@ export default function MenuItemModal({ open, onOpenChange, restaurantId, editIt
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">价格 *</label>
-              <Input value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder="¥" />
+              <Input value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder="FCFA" />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">分类</label>

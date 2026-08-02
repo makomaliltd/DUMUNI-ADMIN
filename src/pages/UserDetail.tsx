@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUser, useUserOrders, useUserTransactions, useUserDeliveries, useUpdateUser, useDeleteUser } from '@/hooks/useUsers';
 import { useState } from 'react';
 import { EditUserModal } from '@/components/EditUserModal';
+import { formatCurrency } from '@/lib/utils';
 
 const roleLabels: Record<string, string> = {
   admin: '管理员', editor: '编辑', viewer: '访客',
@@ -237,7 +238,7 @@ export function UserDetailPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">账户余额</span>
-                      <span className="text-sm font-medium">¥0.00</span>
+                      <span className="text-sm font-medium">{formatCurrency(0)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
@@ -247,7 +248,7 @@ export function UserDetailPage() {
                     <Separator />
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">本月收入</span>
-                      <span className="text-sm font-medium text-emerald-500">+¥0.00</span>
+                      <span className="text-sm font-medium text-emerald-500">+{formatCurrency(0)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
@@ -327,7 +328,7 @@ function UserOrdersList({ userId }: { userId: string }) {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium">¥{String(order.amount)}</p>
+            <p className="text-sm font-medium">{formatCurrency(order.amount)}</p>
             <Badge variant={order.status === 'completed' ? 'success' : order.status === 'cancelled' ? 'destructive' : 'warning'}>
               {(order.status as string) === 'completed' ? '已完成' : (order.status as string) === 'cancelled' ? '已取消' : '进行中'}
             </Badge>
@@ -358,7 +359,7 @@ function UserTransactionsList({ userId }: { userId: string }) {
           </div>
           <div className="text-right">
             <p className={`text-sm font-medium ${(txn.type as string) === 'withdrawal' ? 'text-destructive' : 'text-emerald-500'}`}>
-              {(txn.type as string) === 'withdrawal' ? '-' : '+'}¥{String(txn.amount)}
+              {(txn.type as string) === 'withdrawal' ? '-' : '+'}{formatCurrency(txn.amount)}
             </p>
             <Badge variant={txn.status === 'completed' ? 'success' : 'warning'}>
               {txn.status === 'completed' ? '已完成' : '待处理'}
@@ -385,7 +386,7 @@ function UserDeliveriesList({ userId }: { userId: string }) {
           <div>
             <p className="text-sm font-medium">配送单 #{String(record.id).slice(0, 8)}</p>
             <p className="text-xs text-muted-foreground">
-              距离 {record.distance as string}km · 费用 ¥{record.delivery_fee as string}
+              距离 {record.distance as string}km · 费用 {formatCurrency(record.delivery_fee as number)}
             </p>
           </div>
           <Badge variant={record.status === 'completed' ? 'success' : record.status === 'in_transit' ? 'info' : 'warning'}>

@@ -5,6 +5,7 @@ import { useTopRestaurants } from '@/hooks/useTopRestaurants';
 import { useOrderStatusDistribution } from '@/hooks/useOrderStatusDistribution';
 import { useActiveOrdersSubscription } from '@/hooks/useActiveOrdersSubscription';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/utils';
 import { StatCard } from '@/components/StatCard';
 import { ChartCard } from '@/components/ChartCard';
 import { ActivityFeed } from '@/components/ActivityFeed';
@@ -29,10 +30,6 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-
-function formatCurrency(value: number): string {
-  return `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
@@ -194,7 +191,7 @@ export default function Dashboard() {
                   tick={{ fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(v) => `¥${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k FCFA`}
                 />
                 <Tooltip content={revenueTooltipContent} />
                 <Line

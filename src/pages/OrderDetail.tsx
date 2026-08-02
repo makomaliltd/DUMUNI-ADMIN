@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Truck, XCircle, RefreshCcw, CheckCircle2, Circle } from 'lucide-react';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, ORDER_STATUS_TRANSITIONS, type OrderStatus } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -140,8 +141,8 @@ export default function OrderDetail() {
                   <tr key={item.id} className="border-b last:border-0">
                     <td className="py-2">{item.name}</td>
                     <td className="py-2">x{item.quantity}</td>
-                    <td className="py-2 text-right">¥{Number(item.unit_price).toFixed(2)}</td>
-                    <td className="py-2 text-right">¥{Number(item.total).toFixed(2)}</td>
+                    <td className="py-2 text-right">{formatCurrency(Number(item.unit_price))}</td>
+                    <td className="py-2 text-right">{formatCurrency(Number(item.total))}</td>
                   </tr>
                 ))}
               </tbody>
@@ -210,11 +211,11 @@ export default function OrderDetail() {
           <Card className="p-4">
             <h3 className="text-sm font-semibold mb-3">支付信息</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">小计</span><span>¥{Number(order.subtotal).toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">配送费</span><span>¥{Number(order.delivery_fee).toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">平台佣金</span><span>¥{Number(order.commission).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">小计</span><span>{formatCurrency(Number(order.subtotal))}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">配送费</span><span>{formatCurrency(Number(order.delivery_fee))}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">平台佣金</span><span>{formatCurrency(Number(order.commission))}</span></div>
               <div className="border-t pt-2 flex justify-between font-semibold">
-                <span>总计</span><span className="text-orange-600">¥{Number(order.amount).toFixed(2)}</span>
+                <span>总计</span><span className="text-orange-600">{formatCurrency(Number(order.amount))}</span>
               </div>
               <div className="flex justify-between pt-1">
                 <span className="text-muted-foreground">支付状态</span>
@@ -313,7 +314,7 @@ export default function OrderDetail() {
         <DialogContent>
           <DialogHeader><DialogTitle>退款处理</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">退款金额: ¥{Number(order.amount).toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">退款金额: {formatCurrency(Number(order.amount))}</p>
             <Textarea
               placeholder="退款原因"
               value={refundReason}

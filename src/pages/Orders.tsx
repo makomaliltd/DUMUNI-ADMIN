@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ChevronDown, ChevronUp, Download, Eye, Search, Truck, RefreshCw, Volume2, VolumeX } from 'lucide-react';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, type OrderStatus, type Order } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 
 const statusOptions = [
   { value: 'all', label: '全部状态' },
@@ -288,7 +289,7 @@ export default function Orders() {
                     <td className="px-4 py-3 text-sm">{order.customer_name}</td>
                     <td className="px-4 py-3 text-sm">{order.restaurant_name || '-'}</td>
                     <td className="px-4 py-3 text-sm">{order.driver_name || '-'}</td>
-                    <td className="px-4 py-3 text-sm font-medium">¥{Number(order.amount).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm font-medium">{formatCurrency(Number(order.amount))}</td>
                     <td className="px-4 py-3">
                       <Badge variant={ORDER_STATUS_COLORS[order.status as OrderStatus] as 'default' | 'secondary' | 'destructive' | 'outline'}>
                         {ORDER_STATUS_LABELS[order.status as OrderStatus] || order.status}

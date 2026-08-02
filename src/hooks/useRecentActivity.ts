@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { formatCurrency } from '@/lib/utils';
 import type { ActivityItem } from '@/types';
 
 async function fetchRecentActivity(): Promise<ActivityItem[]> {
@@ -18,7 +19,7 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
       id: `order-${order.id}`,
       type: 'order',
       title: `新订单 #${order.id.slice(0, 8)}`,
-      description: `${order.customer_name} · ¥${order.amount}`,
+      description: `${order.customer_name} · ${formatCurrency(order.amount as number)}`,
       time: order.created_at,
       status: order.status,
     });
@@ -56,7 +57,7 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
       id: `withdrawal-${w.id}`,
       type: 'withdrawal',
       title: '提现申请',
-      description: `${w.user_name} · ¥${w.amount}`,
+      description: `${w.user_name} · ${formatCurrency(w.amount as number)}`,
       time: w.created_at,
       status: w.status,
     });

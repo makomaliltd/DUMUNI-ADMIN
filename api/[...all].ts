@@ -1,9 +1,6 @@
 import express, { type Request, type Response, type NextFunction } from 'express';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import serverRouter from '../../server/routes';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import serverRouter from '../server/routes';
 
 const app = express();
 

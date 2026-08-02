@@ -20,6 +20,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import EditRestaurantModal from '@/components/EditRestaurantModal';
 import MenuItemModal from '@/components/MenuItemModal';
+import { formatCurrency } from '@/lib/utils';
 
 export default function RestaurantDetail() {
   const { id } = useParams<{ id: string }>();
@@ -143,7 +144,7 @@ export default function RestaurantDetail() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">配送费 / 起送价</p>
-              <p className="text-sm font-medium">¥{restaurantData.delivery_fee || '0'} / ¥{restaurantData.min_order || '0'}</p>
+              <p className="text-sm font-medium">{formatCurrency(restaurantData.delivery_fee || 0)} / {formatCurrency(restaurantData.min_order || 0)}</p>
             </div>
           </CardContent>
         </Card>
@@ -242,7 +243,7 @@ export default function RestaurantDetail() {
                         <TableCell>
                           <Badge variant="outline" className="text-xs">{item.category}</Badge>
                         </TableCell>
-                        <TableCell className="text-sm font-medium">¥{item.price}</TableCell>
+                        <TableCell className="text-sm font-medium">{formatCurrency(item.price)}</TableCell>
                         <TableCell>
                           {item.is_available === 'true'
                             ? <Badge variant="success" className="bg-emerald-500">在售</Badge>
@@ -303,7 +304,7 @@ export default function RestaurantDetail() {
                       <TableRow key={order.id}>
                         <TableCell className="text-xs font-mono">{order.id?.slice(0, 8)}</TableCell>
                         <TableCell className="text-sm">{order.customer_name}</TableCell>
-                        <TableCell className="text-sm font-medium">¥{order.amount}</TableCell>
+                        <TableCell className="text-sm font-medium">{formatCurrency(order.amount)}</TableCell>
                         <TableCell>
                           <Badge variant={order.status === 'completed' ? 'success' : order.status === 'active' ? 'default' : order.status === 'cancelled' ? 'destructive' : 'warning'}>
                             {order.status === 'completed' ? '已完成' : order.status === 'active' ? '进行中' : order.status === 'cancelled' ? '已取消' : '待处理'}
@@ -373,7 +374,7 @@ export default function RestaurantDetail() {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-foreground">¥{analytics?.totalRevenue?.toFixed(0) || '0'}</p>
+                <p className="text-2xl font-bold text-foreground">{formatCurrency(analytics?.totalRevenue || 0)}</p>
                 <p className="text-xs text-muted-foreground mt-1">近30天收入</p>
               </CardContent>
             </Card>
@@ -404,7 +405,7 @@ export default function RestaurantDetail() {
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip
                       contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                      formatter={(value: any) => [`¥${value}`, '收入']}
+                      formatter={(value: any) => [formatCurrency(value as number), '收入']}
                     />
                     <Line type="monotone" dataKey="revenue" stroke="#FF6B00" strokeWidth={2} dot={false} />
                   </LineChart>

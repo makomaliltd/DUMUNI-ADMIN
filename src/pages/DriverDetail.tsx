@@ -9,6 +9,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { ArrowLeft, Star, Phone, Mail, Bike, Car, Truck, MapPin, Clock, TrendingUp, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 export default function DriverDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -86,7 +87,7 @@ export default function DriverDetailPage() {
           <StatsCard icon={<TrendingUp className="h-5 w-5" />} label="总配送单" value={stats.total.toString()} color="text-blue-600" bg="bg-blue-50" />
           <StatsCard icon={<CheckCircle className="h-5 w-5" />} label="完成配送" value={stats.completed.toString()} color="text-green-600" bg="bg-green-50" />
           <StatsCard icon={<Clock className="h-5 w-5" />} label="平均配送时间" value={stats.avgTime} color="text-amber-600" bg="bg-amber-50" />
-          <StatsCard icon={<DollarSign className="h-5 w-5" />} label="总收入" value={`¥${parseFloat(driver.total_earnings || "0").toLocaleString()}`} color="text-primary" bg="bg-primary/5" />
+          <StatsCard icon={<DollarSign className="h-5 w-5" />} label="总收入" value={formatCurrency(parseFloat(driver.total_earnings || "0"))} color="text-primary" bg="bg-primary/5" />
         </div>
       </Card>
 
@@ -151,7 +152,7 @@ export default function DriverDetailPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{d.distance} km</TableCell>
-                      <TableCell>¥{d.delivery_fee}</TableCell>
+                      <TableCell>{formatCurrency(d.delivery_fee as number)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {d.completed_at ? new Date(d.completed_at).toLocaleDateString() : "-"}
                       </TableCell>
@@ -185,7 +186,7 @@ export default function DriverDetailPage() {
                       <TableCell>
                         <Badge variant="outline">{t.type}</Badge>
                       </TableCell>
-                      <TableCell className="font-medium">¥{t.amount}</TableCell>
+                      <TableCell className="font-medium">{formatCurrency(t.amount as number)}</TableCell>
                       <TableCell className="text-muted-foreground">{t.description}</TableCell>
                       <TableCell>
                         <Badge variant={t.status === "completed" ? "success" : "warning"}>
