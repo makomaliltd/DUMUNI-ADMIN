@@ -167,12 +167,38 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         collapsed ? 'w-16' : 'w-64'
       )}
     >
-      {/* Logo */}
+      {/* Logo — visually matches the favicon mark */}
       <div className="flex h-16 items-center border-b border-border px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white text-sm font-bold">
-            D
-          </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 64 64"
+            width="32"
+            height="32"
+            aria-hidden="true"
+            className="shrink-0"
+          >
+            <defs>
+              <linearGradient id="sidebar-logo-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FF8A33"/>
+                <stop offset="50%" stopColor="#FF6B00"/>
+                <stop offset="100%" stopColor="#E05D00"/>
+              </linearGradient>
+              <linearGradient id="sidebar-logo-shine" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35"/>
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect x="3" y="3" width="58" height="58" rx="14" ry="14" fill="url(#sidebar-logo-orange)"/>
+            <rect x="3" y="3" width="58" height="29" rx="14" ry="14" fill="url(#sidebar-logo-shine)"/>
+            <path
+              fillRule="evenodd"
+              fill="#ffffff"
+              d="M 17 16 L 17 48 L 35 48 Q 47 48 47 36.5 Q 47 32  44.5 28.5 Q 43 26  40.5 24 Q 48 20.5 48 16 Q 48 12 44 12 L 35 12 Q 29 12 25 14 Q 21 16 19 20 L 19 16 Z M 22 20 L 22 44 L 34 44 Q 42 44 42 36.5 Q 42 33 39.5 30 Q 43 27 43.5 22.5 Q 44 18 38 18 L 30 18 Q 26 18 23 19 Z"
+            />
+            <circle cx="44.5" cy="20" r="1.8" fill="#ffffff" fillOpacity="0.85"/>
+            <circle cx="49" cy="14" r="1.2" fill="#ffffff" fillOpacity="0.55"/>
+          </svg>
           {!collapsed && (
             <span className="text-base font-semibold text-sidebar-foreground whitespace-nowrap">
               DUMUNI

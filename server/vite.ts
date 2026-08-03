@@ -6,28 +6,42 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import type { Server } from 'http';
+import type { UserConfig } from 'vite';
 import { createServer as createViteServer } from 'vite';
 import viteConfig from '../vite.config';
 
 const isDev = process.env.COZE_PROJECT_ENV !== 'PROD';
+
+/** resolve Vite config (it can be a function via defineConfig) */
+function resolveViteConfig(mode: 'development' | 'production'): UserConfig {
+  return typeof viteConfig === 'function'
+    ? (viteConfig as (env: { mode: string; command: 'serve' | 'build' }) => UserConfig)({
+        mode,
+        command: isDev ? 'serve' : 'build',
+      })
+    : (viteConfig as UserConfig);
+}
 
 /**
  * 集成 Vite 开发服务器（中间件模式）
  * 传入 httpServer 以便 Vite HMR WebSocket 复用同一端口
  */
 export async function setupViteMiddleware(app: Application, httpServer: Server) {
+  const cfg = resolveViteConfig('development') as Record<string, unknown> & {
+    server?: Record<string, unknown> & { hmr?: Record<string, unknown> };
+  };
   const vite = await createViteServer({
-    ...viteConfig,
+    ...cfg,
     server: {
-      ...viteConfig.server,
+      ...cfg.server,
       middlewareMode: true,
       hmr: {
-        ...(viteConfig.server?.hmr ?? {}),
+        ...(cfg.server?.hmr ?? {}),
         server: httpServer,
       },
     },
     appType: 'spa',
-  });
+  } as Parameters<typeof createViteServer>[0]);
 
   // 使用 Vite middleware
   app.use(vite.middlewares);

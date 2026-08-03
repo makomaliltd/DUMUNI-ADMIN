@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Safari pinned tab icon: monochrome, single path. fill=black; Safari applies the theme-color automatically. -->
+  <path fill="#000000" fill-rule="evenodd"
+        d="M2.5 2
+           C2.22386 2 2 2.22386 2 2.5
+           V13.5
+           C2 13.7761 2.22386 14 2.5 14
+           H9.5
+           C12.5376 14 15 11.5376 15 8.5
+           V7.5
+           C15 5.567 13.7625 3.858 12 3
+           C13.193 2.282 14 1.018 14 0
+           C14 0 12.34 0 11 0.8
+           C9.95861 0.288115 8.76296 0 7.5 0
+           H2.5
+           Z
+           M4 2.5
+           V12.5
+           H9.5
+           C11.7091 12.5 13.5 10.7091 13.5 8.5
+           V7.5
+           C13.5 5.84315 12.5 4.5 11 4.2
+           V3.8
+           C11.6 3 12 2.5 12 2.5
+           C10.8 2.5 9.33333 2.5 8.5 2.8
+           C7.66667 2.66667 6.6 2.5 5.5 2.5
+           H4
+           Z"/>
+</svg>

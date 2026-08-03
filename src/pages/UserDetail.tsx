@@ -328,7 +328,7 @@ function UserOrdersList({ userId }: { userId: string }) {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium">{formatCurrency(order.amount)}</p>
+            <p className="text-sm font-medium">{formatCurrency(order.amount as number | string | null | undefined)}</p>
             <Badge variant={order.status === 'completed' ? 'success' : order.status === 'cancelled' ? 'destructive' : 'warning'}>
               {(order.status as string) === 'completed' ? '已完成' : (order.status as string) === 'cancelled' ? '已取消' : '进行中'}
             </Badge>
@@ -359,7 +359,7 @@ function UserTransactionsList({ userId }: { userId: string }) {
           </div>
           <div className="text-right">
             <p className={`text-sm font-medium ${(txn.type as string) === 'withdrawal' ? 'text-destructive' : 'text-emerald-500'}`}>
-              {(txn.type as string) === 'withdrawal' ? '-' : '+'}{formatCurrency(txn.amount)}
+              {(txn.type as string) === 'withdrawal' ? '-' : '+'}{formatCurrency(txn.amount as number | string | null | undefined)}
             </p>
             <Badge variant={txn.status === 'completed' ? 'success' : 'warning'}>
               {txn.status === 'completed' ? '已完成' : '待处理'}

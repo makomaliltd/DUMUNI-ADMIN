@@ -49,8 +49,10 @@ function GeneralSettings({ settings, onSave }: any) {
   }, [settings, lang, setLang]);
 
   const handleLanguageChange = (v: string) => {
-    setForm({ ...form, language: v });
-    setLang(v as Language);
+    const matches = languages.filter((l) => l.value === v);
+    const safe: Language = matches.length ? matches[0].value : 'en';
+    setForm({ ...form, language: safe });
+    setLang(safe);
   };
 
   return (

@@ -31,7 +31,7 @@ export function formatCurrency(
   currency: CurrencyCode = 'FCFA',
   decimals: number = currency === 'FCFA' ? 0 : 2,
 ): string {
-  const num = Number(value ?? 0);
+  let num = Number(value ?? 0);
   if (!Number.isFinite(num)) num = 0;
   const formatted = num.toLocaleString(currencyLocales[currency] ?? 'fr-FR', {
     minimumFractionDigits: decimals,

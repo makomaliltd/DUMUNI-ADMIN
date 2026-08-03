@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-const APP_ICON_URL = 'https://coze-coding-project.tos.coze.site/gen_project_icon/2026-08-02/7669380110985723919_1785671110.png?sign=4907735149-66ed5a1995-0-abb032302cd2ebba87321ce7e0c5abb5464c1931743bf8040df9aeda566a56f0';
+// Uses the same SVG favicon mark so login/logo/app/favicons are all consistent
+const APP_ICON_URL = '/favicon.svg';
 
 export function LoginPage() {
   const navigate = useNavigate();

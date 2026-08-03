@@ -152,7 +152,7 @@ export default function DriverDetailPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{d.distance} km</TableCell>
-                      <TableCell>{formatCurrency(d.delivery_fee as number)}</TableCell>
+                      <TableCell>{formatCurrency(d.delivery_fee as unknown as number | string)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {d.completed_at ? new Date(d.completed_at).toLocaleDateString() : "-"}
                       </TableCell>
@@ -186,7 +186,7 @@ export default function DriverDetailPage() {
                       <TableCell>
                         <Badge variant="outline">{t.type}</Badge>
                       </TableCell>
-                      <TableCell className="font-medium">{formatCurrency(t.amount as number)}</TableCell>
+                      <TableCell className="font-medium">{formatCurrency(t.amount as unknown as number | string)}</TableCell>
                       <TableCell className="text-muted-foreground">{t.description}</TableCell>
                       <TableCell>
                         <Badge variant={t.status === "completed" ? "success" : "warning"}>
