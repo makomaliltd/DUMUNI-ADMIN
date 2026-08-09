@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiUrl } from '@/lib/api';
 
 const API_BASE = '/api/content';
 
 async function fetchApi(url: string, options?: RequestInit) {
-  const res = await fetch(url, options);
+  const res = await fetch(apiUrl(url), options);
   if (!res.ok) throw new Error(`API error: ${res.statusText}`);
   return res.json();
 }

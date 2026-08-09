@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { getSupabaseClientSafe } from '@/lib/supabase-browser';
+import { apiUrl } from '@/lib/api';
 
 interface Notification {
   id: string;
@@ -37,7 +38,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch('/api/notifications?pageSize=10');
+      const res = await fetch(apiUrl('/api/notifications?pageSize=10'));
       const json = await res.json();
       if (json.success && json.data) {
         setNotifications(json.data);

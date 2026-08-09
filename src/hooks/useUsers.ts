@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { apiUrl } from '@/lib/api';
 
 export interface UserProfile {
   id: string;
@@ -50,7 +51,7 @@ export function useUsers(filters: UsersFilters = {}) {
       params.set('sortBy', sortBy);
       params.set('sortOrder', sortOrder);
 
-      const res = await fetch(`/api/users?${params}`);
+      const res = await fetch(apiUrl(`/api/users?${params}`));
       if (!res.ok) throw new Error('Failed to fetch users');
       return res.json();
     },
@@ -81,7 +82,7 @@ export function useUser(id: string | undefined) {
     queryKey: ['user', id],
     queryFn: async () => {
       if (!id) throw new Error('User ID is required');
-      const res = await fetch(`/api/users/${id}`);
+      const res = await fetch(apiUrl(`/api/users/${id}`));
       if (!res.ok) throw new Error('Failed to fetch user');
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Failed to fetch user');
@@ -96,7 +97,7 @@ export function useUserOrders(userId: string | undefined, page = 1) {
     queryKey: ['user-orders', userId, page],
     queryFn: async () => {
       if (!userId) throw new Error('User ID is required');
-      const res = await fetch(`/api/users/${userId}/orders?page=${page}&pageSize=10`);
+      const res = await fetch(apiUrl(`/api/users/${userId}/orders?page=${page}&pageSize=10`));
       if (!res.ok) throw new Error('Failed to fetch user orders');
       return res.json();
     },
@@ -109,7 +110,7 @@ export function useUserTransactions(userId: string | undefined, page = 1) {
     queryKey: ['user-transactions', userId, page],
     queryFn: async () => {
       if (!userId) throw new Error('User ID is required');
-      const res = await fetch(`/api/users/${userId}/transactions?page=${page}&pageSize=10`);
+      const res = await fetch(apiUrl(`/api/users/${userId}/transactions?page=${page}&pageSize=10`));
       if (!res.ok) throw new Error('Failed to fetch user transactions');
       return res.json();
     },
@@ -122,7 +123,7 @@ export function useUserDeliveries(userId: string | undefined) {
     queryKey: ['user-deliveries', userId],
     queryFn: async () => {
       if (!userId) throw new Error('User ID is required');
-      const res = await fetch(`/api/users/${userId}/deliveries`);
+      const res = await fetch(apiUrl(`/api/users/${userId}/deliveries`));
       if (!res.ok) throw new Error('Failed to fetch user deliveries');
       return res.json();
     },
@@ -135,7 +136,7 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: string; full_name?: string; email?: string; phone?: string; role?: string; status?: string }) => {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(apiUrl(`/api/users/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -155,7 +156,7 @@ export function useCreateUser() {
 
   return useMutation({
     mutationFn: async (data: { full_name: string; email: string; phone?: string; password: string; role: string }) => {
-      const res = await fetch('/api/users', {
+      const res = await fetch(apiUrl('/api/users'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -174,7 +175,7 @@ export function useBulkAction() {
 
   return useMutation({
     mutationFn: async ({ userIds, action }: { userIds: string[]; action: 'suspend' | 'activate' }) => {
-      const res = await fetch('/api/users/bulk-action', {
+      const res = await fetch(apiUrl('/api/users/bulk-action'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userIds, action }),
@@ -193,7 +194,7 @@ export function useDeleteUser() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(apiUrl(`/api/users/${id}`), { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete user');
       return res.json();
     },

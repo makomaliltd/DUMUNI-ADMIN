@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Globe, Truck, CreditCard, Mail, Shield, Activity, Wrench, Save, Plus, Trash2, Edit,
   Search, RefreshCw, CheckCircle, XCircle, AlertTriangle, Download, Eye, EyeOff, Power,
+  Loader2,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { type Language, languages } from '@/lib/i18n';
@@ -15,6 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/toast';
+import { Send } from 'lucide-react';
 import {
   useSettings, useUpdateSettings,
   useAdminRoles, useCreateAdminRole, useUpdateAdminRole, useDeleteAdminRole,
@@ -25,12 +28,45 @@ import {
 } from '@/hooks/useSettings';
 
 // ============ General Settings ============
-function GeneralSettings({ settings, onSave }: any) {
+
+const TIMEZONE_OPTIONS = [
+  { value: 'Europe/London', label: 'UK', flag: '🇬🇧', tz: 'Europe/London' },
+  { value: 'Asia/Shanghai', label: 'China', flag: '🇨🇳', tz: 'Asia/Shanghai' },
+  { value: 'Africa/Bamako', label: 'Mali', flag: '🇲🇱', tz: 'Africa/Bamako' },
+  { value: 'Africa/Douala', label: 'Douala', flag: '🇨🇲', tz: 'Africa/Douala' },
+  { value: 'UTC', label: 'UTC', flag: '🌐', tz: 'UTC' },
+];
+
+function formatTimeInZone(date: Date, tz: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: tz,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
+function formatDateInZone(date: Date, tz: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: tz,
+    day: '2-digit',
+    month: 'short',
+  }).format(date);
+}
+
+function GeneralSettings({ settings, onSave, saving }: { settings: any; onSave: (d: Record<string, string>) => void; saving: boolean }) {
   const { lang, setLang, t } = useLanguage();
+  const [now, setNow] = useState(() => new Date());
   const [form, setForm] = useState({
     platform_name: '', platform_logo: '', favicon: '', currency: 'FCFA',
-    language: lang, timezone: 'Africa/Douala', date_format: 'YYYY-MM-DD',
+    language: lang, timezone: 'Europe/London', date_format: 'YYYY-MM-DD',
   });
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (settings) {
@@ -41,7 +77,7 @@ function GeneralSettings({ settings, onSave }: any) {
         favicon: settings.favicon || '',
         currency: settings.currency || 'FCFA',
         language: sLang,
-        timezone: settings.timezone || 'Africa/Douala',
+        timezone: settings.timezone || 'Europe/London',
         date_format: settings.date_format || 'YYYY-MM-DD',
       });
       setLang(sLang);
@@ -89,11 +125,22 @@ function GeneralSettings({ settings, onSave }: any) {
             <Select value={form.timezone} onValueChange={v => setForm({ ...form, timezone: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="Africa/Douala">Africa/Douala (UTC+1)</SelectItem>
-                <SelectItem value="Africa/Lagos">Africa/Lagos (UTC+1)</SelectItem>
-                <SelectItem value="UTC">UTC</SelectItem>
+                {TIMEZONE_OPTIONS.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.flag} {opt.label} <span className="ml-2 text-xs text-muted-foreground tabular-nums">{formatTimeInZone(now, opt.tz)}</span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {TIMEZONE_OPTIONS.slice(0, 3).map(opt => (
+                <div key={opt.value} className="rounded-md border bg-muted/30 p-2 text-center">
+                  <div className="text-xs text-muted-foreground">{opt.flag} {opt.label}</div>
+                  <div className="font-mono text-sm font-semibold tabular-nums text-orange-500">{formatTimeInZone(now, opt.tz)}</div>
+                  <div className="text-[10px] text-muted-foreground">{formatDateInZone(now, opt.tz)}</div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="space-y-2"><Label>Date Format</Label>
             <Select value={form.date_format} onValueChange={v => setForm({ ...form, date_format: v })}>
@@ -106,14 +153,17 @@ function GeneralSettings({ settings, onSave }: any) {
             </Select>
           </div>
         </div>
-        <Button onClick={() => onSave(form)} className="mt-2"><Save className="h-4 w-4 mr-1" /> Save General Settings</Button>
+        <Button onClick={() => onSave(form)} disabled={saving} className="mt-2">
+          {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+          {saving ? 'Saving...' : 'Save General Settings'}
+        </Button>
       </CardContent>
     </Card>
   );
 }
 
 // ============ Delivery Settings ============
-function DeliverySettings({ settings, onSave }: any) {
+function DeliverySettings({ settings, onSave, saving }: { settings: any; onSave: (d: Record<string, string>) => void; saving: boolean }) {
   const [form, setForm] = useState({
     base_delivery_fee: '500', per_km_fee: '200', max_delivery_distance: '20',
     estimated_delivery_min: '15', estimated_delivery_max: '45',
@@ -148,14 +198,17 @@ function DeliverySettings({ settings, onSave }: any) {
           <p className="font-medium">Preview:</p>
           <p className="text-muted-foreground">5 km delivery: {Number(form.base_delivery_fee) + Number(form.per_km_fee) * 5} FCFA • Est. {form.estimated_delivery_min}-{form.estimated_delivery_max} min</p>
         </div>
-        <Button onClick={() => onSave(form)}><Save className="h-4 w-4 mr-1" /> Save Delivery Settings</Button>
+        <Button onClick={() => onSave(form)} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+          {saving ? 'Saving...' : 'Save Delivery Settings'}
+        </Button>
       </CardContent>
     </Card>
   );
 }
 
 // ============ Payment Settings ============
-function PaymentSettings({ settings, onSave }: any) {
+function PaymentSettings({ settings, onSave, saving }: { settings: any; onSave: (d: Record<string, string>) => void; saving: boolean }) {
   const [form, setForm] = useState({
     commission_rate: '15', min_order_amount: '1000', tax_rate: '0',
     paydunya_master_key: '', paydunya_private_key: '', paydunya_token: '',
@@ -196,14 +249,17 @@ function PaymentSettings({ settings, onSave }: any) {
           <div className="space-y-2"><Label>Private Key</Label><Input type={showKeys ? 'text' : 'password'} value={form.paydunya_private_key} onChange={e => setForm({ ...form, paydunya_private_key: e.target.value })} placeholder="Enter PayDunya Private Key" /></div>
           <div className="space-y-2"><Label>Token</Label><Input type={showKeys ? 'text' : 'password'} value={form.paydunya_token} onChange={e => setForm({ ...form, paydunya_token: e.target.value })} placeholder="Enter PayDunya Token" /></div>
         </div>
-        <Button onClick={() => onSave(form)}><Save className="h-4 w-4 mr-1" /> Save Payment Settings</Button>
+        <Button onClick={() => onSave(form)} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+          {saving ? 'Saving...' : 'Save Payment Settings'}
+        </Button>
       </CardContent>
     </Card>
   );
 }
 
 // ============ Email/SMS Settings ============
-function EmailSmsSettings({ settings, emailTemplates, onSave, onUpdateTemplate }: any) {
+function EmailSmsSettings({ settings, emailTemplates, onSave, onUpdateTemplate, saving }: { settings: any; emailTemplates: any[]; onSave: (d: Record<string, string>) => void; onUpdateTemplate: (d: any) => void; saving: boolean }) {
   const [form, setForm] = useState({
     smtp_host: '', smtp_port: '587', smtp_user: '', smtp_pass: '', smtp_from: '', sms_gateway: '', sms_api_key: '',
   });
@@ -288,7 +344,10 @@ function EmailSmsSettings({ settings, emailTemplates, onSave, onUpdateTemplate }
       </Card>
 
       <div className="flex gap-2">
-        <Button onClick={handleSave}><Save className="h-4 w-4 mr-1" /> Save All Email/SMS Settings</Button>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+          {saving ? 'Saving...' : 'Save All Email/SMS Settings'}
+        </Button>
         <Button variant="outline"><Mail className="h-4 w-4 mr-1" /> Test Email</Button>
         <Button variant="outline"><Send className="h-4 w-4 mr-1" /> Test SMS</Button>
       </div>
@@ -770,6 +829,7 @@ function MaintenancePanel({ healthData, onRefresh }: any) {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [logPage, setLogPage] = useState(1);
+  const { addToast } = useToast();
 
   const { data: settingsData } = useSettings();
   const updateSettings = useUpdateSettings();
@@ -796,8 +856,17 @@ export default function SettingsPage() {
   const logTotal = logsData?.total || 0;
   const health = healthData?.data;
 
+  const saving = updateSettings.isPending;
+
   const handleSaveSettings = (updates: Record<string, string>) => {
-    updateSettings.mutate(updates);
+    updateSettings.mutate(updates, {
+      onSuccess: () => {
+        addToast({ title: 'Settings saved', description: 'Your changes have been saved successfully.', type: 'success' });
+      },
+      onError: (err: Error) => {
+        addToast({ title: 'Save failed', description: err.message || 'Could not save settings. Please try again.', type: 'error' });
+      },
+    });
   };
 
   return (
@@ -819,15 +888,15 @@ export default function SettingsPage() {
         </TabsList>
 
         <TabsContent value="general" className="mt-4">
-          <GeneralSettings settings={settings} onSave={handleSaveSettings} />
+          <GeneralSettings settings={settings} onSave={handleSaveSettings} saving={saving} />
         </TabsContent>
 
         <TabsContent value="delivery" className="mt-4">
-          <DeliverySettings settings={settings} onSave={handleSaveSettings} />
+          <DeliverySettings settings={settings} onSave={handleSaveSettings} saving={saving} />
         </TabsContent>
 
         <TabsContent value="payment" className="mt-4">
-          <PaymentSettings settings={settings} onSave={handleSaveSettings} />
+          <PaymentSettings settings={settings} onSave={handleSaveSettings} saving={saving} />
         </TabsContent>
 
         <TabsContent value="email" className="mt-4">
@@ -836,6 +905,7 @@ export default function SettingsPage() {
             emailTemplates={emailTemplates}
             onSave={handleSaveSettings}
             onUpdateTemplate={(d: any) => updateTemplate.mutate(d)}
+            saving={saving}
           />
         </TabsContent>
 
@@ -843,12 +913,30 @@ export default function SettingsPage() {
           <AdminManagement
             adminUsers={adminUsers}
             adminRoles={adminRoles}
-            onAddUser={(d: any) => addUser.mutate(d)}
-            onUpdateUser={(d: any) => updateUser.mutate(d)}
-            onRemoveUser={(id: string) => removeUser.mutate(id)}
-            onCreateRole={(d: any) => createRole.mutate(d)}
-            onUpdateRole={(d: any) => updateRole.mutate(d)}
-            onDeleteRole={(id: string) => deleteRole.mutate(id)}
+            onAddUser={(d: any) => addUser.mutate(d, {
+              onSuccess: () => addToast({ title: 'Admin user added', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Failed to add admin', description: e.message, type: 'error' }),
+            })}
+            onUpdateUser={(d: any) => updateUser.mutate(d, {
+              onSuccess: () => addToast({ title: 'Admin user updated', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Update failed', description: e.message, type: 'error' }),
+            })}
+            onRemoveUser={(id: string) => removeUser.mutate(id, {
+              onSuccess: () => addToast({ title: 'Admin user removed', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Remove failed', description: e.message, type: 'error' }),
+            })}
+            onCreateRole={(d: any) => createRole.mutate(d, {
+              onSuccess: () => addToast({ title: 'Role created', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Create failed', description: e.message, type: 'error' }),
+            })}
+            onUpdateRole={(d: any) => updateRole.mutate(d, {
+              onSuccess: () => addToast({ title: 'Role updated', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Update failed', description: e.message, type: 'error' }),
+            })}
+            onDeleteRole={(id: string) => deleteRole.mutate(id, {
+              onSuccess: () => addToast({ title: 'Role deleted', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Delete failed', description: e.message, type: 'error' }),
+            })}
           />
         </TabsContent>
 
@@ -858,7 +946,10 @@ export default function SettingsPage() {
             total={logTotal}
             page={logPage}
             onPageChange={setLogPage}
-            onClear={() => clearLogs.mutate()}
+            onClear={() => clearLogs.mutate(undefined, {
+              onSuccess: () => addToast({ title: 'Old logs cleared', type: 'success' }),
+              onError: (e: Error) => addToast({ title: 'Clear failed', description: e.message, type: 'error' }),
+            })}
           />
         </TabsContent>
 
@@ -869,6 +960,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-// Missing import for Send icon
-import { Send } from 'lucide-react';

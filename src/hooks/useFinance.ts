@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiUrl } from '@/lib/api';
 import type { Withdrawal, FinancialSetting, AuditLog } from '@/types';
 
 const API = '/api/finance';
 
 async function fetchJSON<T>(url: string, opts?: RequestInit): Promise<T> {
-  const res = await fetch(url, opts);
+  const res = await fetch(apiUrl(url), opts);
   const json = await res.json();
   if (!json.success) throw new Error(json.error || 'Request failed');
   return json.data as T;

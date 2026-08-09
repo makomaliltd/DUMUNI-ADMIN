@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiUrl } from '@/lib/api';
 
 const API_BASE = '/api/orders';
 
@@ -35,7 +36,7 @@ export function useOrders(filters: OrderFilters = {}) {
   return useQuery({
     queryKey: ['orders', filters],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}?${params}`);
+      const res = await fetch(apiUrl(`${API_BASE}?${params}`));
       if (!res.ok) throw new Error('Failed to fetch orders');
       return res.json();
     },
@@ -47,7 +48,7 @@ export function useOrder(id: string) {
   return useQuery({
     queryKey: ['order', id],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/${id}`);
+      const res = await fetch(apiUrl(`${API_BASE}/${id}`));
       if (!res.ok) throw new Error('Failed to fetch order');
       return res.json();
     },
@@ -61,7 +62,7 @@ export function useUpdateOrderStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status, reason }: { id: string; status: string; reason?: string }) => {
-      const res = await fetch(`${API_BASE}/${id}/status`, {
+      const res = await fetch(apiUrl(`${API_BASE}/${id}/status`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, reason }),
@@ -95,7 +96,7 @@ export function useAssignDriver() {
 
   return useMutation({
     mutationFn: async ({ orderId, driverId }: { orderId: string; driverId: string }) => {
-      const res = await fetch(`${API_BASE}/${orderId}/assign-driver`, {
+      const res = await fetch(apiUrl(`${API_BASE}/${orderId}/assign-driver`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ driver_id: driverId }),
@@ -128,7 +129,7 @@ export function useBulkUpdateOrders() {
 
   return useMutation({
     mutationFn: async ({ ids, action }: { ids: string[]; action: string }) => {
-      const res = await fetch(`${API_BASE}/bulk`, {
+      const res = await fetch(apiUrl(`${API_BASE}/bulk`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids, action }),
@@ -163,7 +164,7 @@ export function useOrderItems(orderId: string) {
   return useQuery({
     queryKey: ['order-items', orderId],
     queryFn: async () => {
-      const res = await fetch(`/api/orders/${orderId}/items`);
+      const res = await fetch(apiUrl(`/api/orders/${orderId}/items`));
       if (!res.ok) throw new Error('Failed to fetch order items');
       return res.json();
     },
@@ -176,7 +177,7 @@ export function useOrderStatusLogs(orderId: string) {
   return useQuery({
     queryKey: ['order-status-logs', orderId],
     queryFn: async () => {
-      const res = await fetch(`/api/orders/${orderId}/status-logs`);
+      const res = await fetch(apiUrl(`/api/orders/${orderId}/status-logs`));
       if (!res.ok) throw new Error('Failed to fetch status logs');
       return res.json();
     },
@@ -189,7 +190,7 @@ export function useRefundOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const res = await fetch(`/api/orders/${id}/refund`, {
+      const res = await fetch(apiUrl(`/api/orders/${id}/refund`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
@@ -207,7 +208,7 @@ export function useAvailableDrivers() {
   return useQuery({
     queryKey: ['available-drivers'],
     queryFn: async () => {
-      const res = await fetch('/api/orders/available-drivers');
+      const res = await fetch(apiUrl('/api/orders/available-drivers'));
       if (!res.ok) throw new Error('Failed to fetch available drivers');
       return res.json();
     },
@@ -219,7 +220,7 @@ export function useBulkAssignDriver() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ orderIds, driverId }: { orderIds: string[]; driverId: string }) => {
-      const res = await fetch('/api/orders/bulk-assign-driver', {
+      const res = await fetch(apiUrl('/api/orders/bulk-assign-driver'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_ids: orderIds, driver_id: driverId }),
@@ -237,7 +238,7 @@ export function useBulkUpdateStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ orderIds, status }: { orderIds: string[]; status: string }) => {
-      const res = await fetch('/api/orders/bulk-status', {
+      const res = await fetch(apiUrl('/api/orders/bulk-status'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_ids: orderIds, status }),
@@ -258,7 +259,7 @@ export function useExportOrders() {
       if (filters.status) params.set('status', Array.isArray(filters.status) ? filters.status.join(',') : filters.status);
       if (filters.date_from) params.set('date_from', filters.date_from);
       if (filters.date_to) params.set('date_to', filters.date_to);
-      const res = await fetch(`${API_BASE}/export?${params}`);
+      const res = await fetch(apiUrl(`${API_BASE}/export?${params}`));
       if (!res.ok) throw new Error('Failed to export orders');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);

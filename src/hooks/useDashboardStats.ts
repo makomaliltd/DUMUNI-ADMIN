@@ -14,11 +14,11 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
     .from('orders')
     .select('*', { count: 'exact', head: true });
 
-  // Active orders count
+  // Active orders count (orders not in terminal states)
   const { count: activeOrders } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'active');
+    .in('status', ['pending', 'accepted', 'preparing', 'ready', 'delivering']);
 
   // Total revenue (sum of commission)
   const { data: revenueData } = await supabase
@@ -31,13 +31,13 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
   );
 
   // Pending verifications (pending reviews + pending withdrawals)
+  // Note: reviews table has no 'status' column, count all reviews as pending for admin review
   const { count: pendingReviews } = await supabase
     .from('reviews')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending');
+    .select('*', { count: 'exact', head: true });
 
   const { count: pendingWithdrawals } = await supabase
-    .from('withdrawals')
+    .from('withdrawal_requests')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'pending');
 

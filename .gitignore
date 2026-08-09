@@ -125,6 +125,7 @@ pids
 .eslintcache
 .stylelintcache
 node-compile-cache/
+.tmp/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

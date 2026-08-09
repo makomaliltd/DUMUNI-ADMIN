@@ -26,6 +26,34 @@ async function startServer(): Promise<Server> {
     });
   }
 
+  // CORS — allow frontend deployed on Vercel (or any origin in dev)
+  app.use((req, res, next) => {
+    const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '*')
+      .split(',')
+      .map(s => s.trim());
+    const origin = req.headers.origin;
+
+    if (origin) {
+      const isAllowed = allowedOrigins.includes('*') || allowedOrigins.includes(origin);
+      if (isAllowed) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+      }
+    } else if (allowedOrigins.includes('*')) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,x-session,x-client-info,apikey');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      return res.status(204).end();
+    }
+
+    next();
+  });
+
   // 添加请求体解析
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

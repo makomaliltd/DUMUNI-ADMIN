@@ -15,11 +15,11 @@ export function useActiveOrdersSubscription() {
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
 
-    // Fetch initial active count
+    // Fetch initial active count (orders not in terminal states)
     supabase
       .from('orders')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
+      .in('status', ['pending', 'accepted', 'preparing', 'ready', 'delivering'])
       .then(({ count }) => {
         if (count !== null) setActiveCount(count);
       });
@@ -33,7 +33,7 @@ export function useActiveOrdersSubscription() {
           event: '*',
           schema: 'public',
           table: 'orders',
-          filter: 'status=eq.active',
+          filter: 'status=in.(pending,accepted,preparing,ready,delivering)',
         },
         (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
           const eventType = payload.eventType;

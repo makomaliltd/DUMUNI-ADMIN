@@ -7,11 +7,12 @@ async function fetchRevenueTrend(): Promise<RevenueTrend[]> {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const { data: records } = await supabase
-    .from('revenue_records')
-    .select('date, amount, commission')
-    .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
-    .order('date', { ascending: true }) as { data: any[] | null };
+  // Fetch orders from last 30 days (aggregate by date from orders table)
+  const { data: orders } = await supabase
+    .from('orders')
+    .select('created_at, total, commission')
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .order('created_at', { ascending: true }) as { data: any[] | null };
 
   const today = new Date(now.toISOString().split('T')[0]);
   const dateMap = new Map<string, { revenue: number; commission: number }>();
@@ -21,12 +22,12 @@ async function fetchRevenueTrend(): Promise<RevenueTrend[]> {
     dateMap.set(key, { revenue: 0, commission: 0 });
   }
 
-  for (const record of records ?? []) {
-    const key = typeof record.date === 'string' ? record.date : '';
-    if (dateMap.has(key)) {
-      const existing = dateMap.get(key)!;
-      existing.revenue += parseFloat(record.amount as string);
-      existing.commission += parseFloat(record.commission as string);
+  for (const order of orders ?? []) {
+    const orderDate = order.created_at ? order.created_at.toString().split('T')[0] : '';
+    if (dateMap.has(orderDate)) {
+      const existing = dateMap.get(orderDate)!;
+      existing.revenue += parseFloat(order.total as string) || 0;
+      existing.commission += parseFloat(order.commission as string) || 0;
     }
   }
 

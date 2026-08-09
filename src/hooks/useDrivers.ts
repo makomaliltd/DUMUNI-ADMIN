@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiUrl } from "@/lib/api";
 
 const API_BASE = "";
 
@@ -109,7 +110,7 @@ export function useDrivers(params: DriversQueryParams) {
   return useQuery<DriversResponse>({
     queryKey: ["drivers", params],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/drivers?${searchParams.toString()}`);
+      const res = await fetch(apiUrl(`/api/drivers?${searchParams.toString()}`));
       if (!res.ok) throw new Error("Failed to fetch drivers");
       return res.json();
     },
@@ -144,7 +145,7 @@ export function useUpdateDriver() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data: driverData }: { id: string; data: Partial<Driver> }) => {
-      const res = await fetch(`${API_BASE}/api/drivers/${id}`, {
+      const res = await fetch(apiUrl(`/api/drivers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(driverData),
@@ -162,7 +163,7 @@ export function useDeleteDriver() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${API_BASE}/api/drivers/${id}`, { method: "DELETE" });
+      const res = await fetch(apiUrl(`/api/drivers/${id}`), { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete driver");
       return res.json();
     },
@@ -179,7 +180,7 @@ export function useDriverApplications(status?: string) {
     queryKey: ["driver-applications", status],
     queryFn: async () => {
       const params = status ? `?status=${status}` : "";
-      const res = await fetch(`${API_BASE}/api/driver-applications${params}`);
+      const res = await fetch(apiUrl(`/api/driver-applications${params}`));
       if (!res.ok) throw new Error("Failed to fetch applications");
       return res.json();
     },
@@ -190,7 +191,7 @@ export function useDriverApplication(id: string) {
   return useQuery<{ success: boolean; data: DriverApplication }>({
     queryKey: ["driver-application", id],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/driver-applications/${id}`);
+      const res = await fetch(apiUrl(`/api/driver-applications/${id}`));
       if (!res.ok) throw new Error("Failed to fetch application");
       return res.json();
     },
@@ -202,7 +203,7 @@ export function useReviewDriverApplication() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
-      const res = await fetch(`${API_BASE}/api/driver-applications/${id}`, {
+      const res = await fetch(apiUrl(`/api/driver-applications/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, notes }),

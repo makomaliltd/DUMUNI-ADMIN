@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { apiUrl } from '@/lib/api';
 
 interface SupabaseConfig {
   url: string;
@@ -67,7 +68,7 @@ export function SupabaseConfigProvider({ children }: SupabaseConfigProviderProps
     if (envCfg) {
       done(envCfg);
       // Also attempt API refresh in background to stay consistent, but don't block UI
-      fetch('/api/supabase-config')
+      fetch(apiUrl('/api/supabase-config'))
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (data?.url && data?.anonKey && !cancelled) {
@@ -83,7 +84,7 @@ export function SupabaseConfigProvider({ children }: SupabaseConfigProviderProps
       return;
     }
 
-    fetch('/api/supabase-config')
+    fetch(apiUrl('/api/supabase-config'))
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

@@ -1,15 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiUrl } from '@/lib/api';
 
 const API_BASE = '/api/reports';
 
 async function fetchJSON(url: string) {
-  const res = await fetch(url);
+  const res = await fetch(apiUrl(url));
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 async function postJSON(url: string, data: any) {
-  const res = await fetch(url, {
+  const res = await fetch(apiUrl(url), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -19,7 +20,7 @@ async function postJSON(url: string, data: any) {
 }
 
 async function putJSON(url: string, data: any) {
-  const res = await fetch(url, {
+  const res = await fetch(apiUrl(url), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -29,7 +30,7 @@ async function putJSON(url: string, data: any) {
 }
 
 async function del(url: string) {
-  const res = await fetch(url, { method: 'DELETE' });
+  const res = await fetch(apiUrl(url), { method: 'DELETE' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ApiResponse } from '@/types';
+import { apiUrl } from '@/lib/api';
 
 export interface Restaurant {
   id: string;
@@ -96,7 +97,7 @@ export function useRestaurants(params: {
   return useQuery<PaginatedResponse<Restaurant>>({
     queryKey: ['restaurants', params],
     queryFn: async () => {
-      const res = await fetch(`/api/restaurants?${searchParams}`);
+      const res = await fetch(apiUrl(`/api/restaurants?${searchParams}`);
       if (!res.ok) throw new Error('Failed to fetch restaurants');
       return res.json();
     },
@@ -107,7 +108,7 @@ export function useRestaurant(id: string | undefined) {
   return useQuery<ApiResponse<Restaurant & { owner: Restaurant['owner']; stats: { orderCount: number; reviewCount: number } }>>({
     queryKey: ['restaurant', id],
     queryFn: async () => {
-      const res = await fetch(`/api/restaurants/${id}`);
+      const res = await fetch(apiUrl(`/api/restaurants/${id}`);
       if (!res.ok) throw new Error('Failed to fetch restaurant');
       return res.json();
     },
@@ -119,7 +120,7 @@ export function useUpdateRestaurant() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Restaurant> }) => {
-      const res = await fetch(`/api/restaurants/${id}`, {
+      const res = await fetch(apiUrl(`/api/restaurants/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -138,7 +139,7 @@ export function useToggleRestaurantStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/restaurants/${id}/toggle-status`, { method: 'POST' });
+      const res = await fetch(apiUrl(`/api/restaurants/${id}/toggle-status`), { method: 'POST' });
       if (!res.ok) throw new Error('Failed to toggle status');
       return res.json();
     },
@@ -155,7 +156,7 @@ export function useMenuItems(restaurantId: string | undefined) {
   return useQuery<ApiResponse<MenuItem[]>>({
     queryKey: ['menu-items', restaurantId],
     queryFn: async () => {
-      const res = await fetch(`/api/restaurants/${restaurantId}/menu`);
+      const res = await fetch(apiUrl(`/api/restaurants/${restaurantId}/menu`);
       if (!res.ok) throw new Error('Failed to fetch menu items');
       return res.json();
     },
@@ -167,7 +168,7 @@ export function useCreateMenuItem() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ restaurantId, data }: { restaurantId: string; data: Partial<MenuItem> }) => {
-      const res = await fetch(`/api/restaurants/${restaurantId}/menu`, {
+      const res = await fetch(apiUrl(`/api/restaurants/${restaurantId}/menu`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -185,7 +186,7 @@ export function useUpdateMenuItem() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<MenuItem> }) => {
-      const res = await fetch(`/api/menu/${id}`, {
+      const res = await fetch(apiUrl(`/api/menu/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -203,7 +204,7 @@ export function useDeleteMenuItem() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/menu/${id}`, { method: 'DELETE' });
+      const res = await fetch(apiUrl(`/api/menu/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete menu item');
       return res.json();
     },
@@ -219,7 +220,7 @@ export function useRestaurantOrders(restaurantId: string | undefined, page: numb
   return useQuery({
     queryKey: ['restaurant-orders', restaurantId, page],
     queryFn: async () => {
-      const res = await fetch(`/api/restaurants/${restaurantId}/orders?page=${page}`);
+      const res = await fetch(apiUrl(`/api/restaurants/${restaurantId}/orders?page=${page}`);
       if (!res.ok) throw new Error('Failed to fetch orders');
       return res.json();
     },
@@ -233,7 +234,7 @@ export function useRestaurantReviews(restaurantId: string | undefined) {
   return useQuery<ApiResponse<any[]>>({
     queryKey: ['restaurant-reviews', restaurantId],
     queryFn: async () => {
-      const res = await fetch(`/api/restaurants/${restaurantId}/reviews`);
+      const res = await fetch(apiUrl(`/api/restaurants/${restaurantId}/reviews`));
       if (!res.ok) throw new Error('Failed to fetch reviews');
       return res.json();
     },
@@ -253,7 +254,7 @@ export function useRestaurantAnalytics(restaurantId: string | undefined) {
   }>>({
     queryKey: ['restaurant-analytics', restaurantId],
     queryFn: async () => {
-      const res = await fetch(`/api/restaurants/${restaurantId}/analytics`);
+      const res = await fetch(apiUrl(`/api/restaurants/${restaurantId}/analytics`);
       if (!res.ok) throw new Error('Failed to fetch analytics');
       return res.json();
     },
@@ -272,7 +273,7 @@ export function useSellerApplications(params: { page?: number; pageSize?: number
   return useQuery<PaginatedResponse<SellerApplication>>({
     queryKey: ['seller-applications', params],
     queryFn: async () => {
-      const res = await fetch(`/api/seller-applications?${searchParams}`);
+      const res = await fetch(apiUrl(`/api/seller-applications?${searchParams}`);
       if (!res.ok) throw new Error('Failed to fetch applications');
       return res.json();
     },
@@ -283,7 +284,7 @@ export function useSellerApplication(id: string | undefined) {
   return useQuery<ApiResponse<SellerApplication>>({
     queryKey: ['seller-application', id],
     queryFn: async () => {
-      const res = await fetch(`/api/seller-applications/${id}`);
+      const res = await fetch(apiUrl(`/api/seller-applications/${id}`);
       if (!res.ok) throw new Error('Failed to fetch application');
       return res.json();
     },
@@ -295,7 +296,7 @@ export function useReviewApplication() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
-      const res = await fetch(`/api/seller-applications/${id}`, {
+      const res = await fetch(apiUrl(`/api/seller-applications/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, notes }),

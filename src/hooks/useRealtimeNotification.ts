@@ -17,7 +17,7 @@ export function useRealtimeOrderNotifications() {
           const order = payload.new as Record<string, unknown>;
           addToast({
             title: '🆕 New Order',
-            description: `Order #${String(order.id).slice(0, 8)} received — ${String(order.amount || '?')} FCFA`,
+            description: `Order #${String(order.id).slice(0, 8)} received — ${String(order.total || '?')} FCFA`,
             type: 'success',
             duration: 5000,
           });
