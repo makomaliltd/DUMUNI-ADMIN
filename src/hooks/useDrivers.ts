@@ -145,7 +145,7 @@ export function useUpdateDriver() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data: driverData }: { id: string; data: Partial<Driver> }) => {
-      const res = await fetch(apiUrl(`/api/drivers/${id}`, {
+      const res = await fetch(apiUrl(`/api/drivers/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(driverData),
