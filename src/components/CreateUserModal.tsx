@@ -44,7 +44,7 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
     if (!form.password) errs.password = '请输入密码';
     else if (form.password.length < 6) errs.password = '密码至少6位';
     if (form.password !== form.confirmPassword) errs.confirmPassword = '两次密码不一致';
-    if (form.phone && !/^1\d{10}$/.test(form.phone)) errs.phone = '手机号格式不正确';
+    if (form.phone && !/^\+?[1-9]\d{6,14}$/.test(form.phone)) errs.phone = '手机号格式不正确';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }

@@ -54,7 +54,7 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
     if (!form.full_name.trim()) errs.full_name = '请输入姓名';
     if (!form.email.trim()) errs.email = '请输入邮箱';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = '邮箱格式不正确';
-    if (form.phone && !/^1\d{10}$/.test(form.phone)) errs.phone = '手机号格式不正确';
+    if (form.phone && !/^\+?[1-9]\d{6,14}$/.test(form.phone)) errs.phone = '手机号格式不正确';
     if (!form.role) errs.role = '请选择角色';
     if (!form.status) errs.status = '请选择状态';
     setErrors(errs);
