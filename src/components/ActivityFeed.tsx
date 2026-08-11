@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   ShoppingCart,
   MessageSquare,
@@ -23,7 +24,7 @@ const activityColors = {
   registration: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400',
 } as const;
 
-function formatTimeAgo(dateStr: string): string {
+function formatTimeAgo(dateStr: string, locale: string, t: (key: string) => string): string {
   const now = Date.now();
   const time = new Date(dateStr).getTime();
   const diff = now - time;
@@ -31,14 +32,19 @@ function formatTimeAgo(dateStr: string): string {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (minutes < 1) return '刚刚';
-  if (minutes < 60) return `${minutes}分钟前`;
-  if (hours < 24) return `${hours}小时前`;
-  if (days < 7) return `${days}天前`;
-  return new Date(dateStr).toLocaleDateString('zh-CN');
+  if (minutes < 1) return t('activity.justNow');
+  if (minutes < 60) return `${minutes} ${t('activity.minutesAgo')}`;
+  if (hours < 24) return `${hours} ${t('activity.hoursAgo')}`;
+  if (days < 7) return `${days} ${t('activity.daysAgo')}`;
+  return new Date(dateStr).toLocaleDateString(locale);
 }
 
 export function ActivityFeed() {
+  const { t, lang } = useLanguage();
+
+  const localeMap: Record<string, string> = { en: 'en-US', zh: 'zh-CN', fr: 'fr-FR' };
+  const dateLocale = localeMap[lang] || 'en-US';
+
   const { data: activities, isLoading, error } = useRecentActivity();
 
   if (isLoading) {
@@ -52,7 +58,7 @@ export function ActivityFeed() {
   if (error) {
     return (
       <div className="flex h-48 items-center justify-center">
-        <p className="text-sm text-red-500">加载失败</p>
+        <p className="text-sm text-red-500">{t('activity.loadFailed')}</p>
       </div>
     );
   }
@@ -61,7 +67,7 @@ export function ActivityFeed() {
     <div className="space-y-1">
       <div className="mb-3 flex items-center gap-2">
         <Clock className="h-4 w-4 text-muted-foreground" />
-        <span className="text-xs font-medium text-muted-foreground">实时更新</span>
+        <span className="text-xs font-medium text-muted-foreground">{t('activity.realtimeUpdate')}</span>
       </div>
       <div className="space-y-0.5">
         {activities?.map((activity) => {
@@ -83,14 +89,14 @@ export function ActivityFeed() {
                 </p>
               </div>
               <span className="shrink-0 text-xs text-muted-foreground">
-                {formatTimeAgo(activity.time)}
+                {formatTimeAgo(activity.time, dateLocale, t)}
               </span>
             </div>
           );
         })}
       </div>
       {(!activities || activities.length === 0) && (
-        <p className="py-8 text-center text-sm text-muted-foreground">暂无活动</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">{t('activity.noActivities')}</p>
       )}
     </div>
   );

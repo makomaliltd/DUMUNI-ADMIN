@@ -24,11 +24,8 @@ import {
 import { useUsers, useBulkAction, type UserProfile } from '@/hooks/useUsers';
 import { EditUserModal } from '@/components/EditUserModal';
 import { CreateUserModal } from '@/components/CreateUserModal';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-const roleLabels: Record<string, string> = {
-  admin: '管理员', editor: '编辑', viewer: '访客',
-  buyer: '买家', seller: '商家', driver: '骑手',
-};
 const roleColors: Record<string, 'destructive' | 'info' | 'secondary' | 'default' | 'success' | 'warning'> = {
   admin: 'destructive', editor: 'info', viewer: 'secondary',
   buyer: 'default', seller: 'success', driver: 'warning',
@@ -44,6 +41,7 @@ function formatDate(dateStr: string) {
 }
 
 export function UsersPage() {
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -102,11 +100,11 @@ export function UsersPage() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['姓名', '邮箱', '手机号', '角色', '状态', '注册时间'];
+    const headers = [t('users.name'), t('users.email'), t('users.phone'), t('users.role'), t('users.status'), t('users.registrationTime')];
     const rows = users.map(u => [
       u.full_name || '', u.email, u.phone || '',
-      roleLabels[u.role] || u.role,
-      u.status === 'active' ? '正常' : '停用',
+      t(`users.${u.role}` as any) || u.role,
+      u.status === 'active' ? t('users.active') : t('users.suspended'),
       formatDate(u.created_at),
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
@@ -129,11 +127,11 @@ export function UsersPage() {
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">用户管理</h1>
-          <p className="text-sm text-muted-foreground">管理系统用户与权限</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('users.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('users.subtitle')}</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />新建用户
+          <Plus className="mr-2 h-4 w-4" />{t('users.addUser')}
         </Button>
       </div>
 
@@ -144,7 +142,7 @@ export function UsersPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="搜索姓名、邮箱、手机号..."
+                placeholder={t('users.searchPlaceholder')}
                 className="pl-8"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -153,29 +151,29 @@ export function UsersPage() {
             </div>
             <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(1); setSelectedIds(new Set()); }}>
               <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="角色筛选" />
+                <SelectValue placeholder={t('users.roleFilter')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部角色</SelectItem>
-                <SelectItem value="admin">管理员</SelectItem>
-                <SelectItem value="editor">编辑</SelectItem>
-                <SelectItem value="viewer">访客</SelectItem>
-                <SelectItem value="buyer">买家</SelectItem>
-                <SelectItem value="seller">商家</SelectItem>
-                <SelectItem value="driver">骑手</SelectItem>
+                <SelectItem value="all">{t('users.allRoles')}</SelectItem>
+                <SelectItem value="admin">{t('users.admin')}</SelectItem>
+                <SelectItem value="editor">{t('users.editor')}</SelectItem>
+                <SelectItem value="viewer">{t('users.viewer')}</SelectItem>
+                <SelectItem value="buyer">{t('users.buyer')}</SelectItem>
+                <SelectItem value="seller">{t('users.seller')}</SelectItem>
+                <SelectItem value="driver">{t('users.driver')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); setSelectedIds(new Set()); }}>
               <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="状态筛选" />
+                <SelectValue placeholder={t('users.statusFilter')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="active">正常</SelectItem>
-                <SelectItem value="suspended">停用</SelectItem>
+                <SelectItem value="all">{t('users.allStatus')}</SelectItem>
+                <SelectItem value="active">{t('users.active')}</SelectItem>
+                <SelectItem value="suspended">{t('users.suspended')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="secondary" onClick={handleSearch}>搜索</Button>
+            <Button variant="secondary" onClick={handleSearch}>{t('common.search')}</Button>
           </div>
         </CardContent>
       </Card>
@@ -183,15 +181,15 @@ export function UsersPage() {
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
         <div className="flex items-center gap-2 rounded-lg border bg-muted/50 p-3">
-          <span className="text-sm text-muted-foreground">已选 {selectedIds.size} 项</span>
+          <span className="text-sm text-muted-foreground">{t('users.selected', { count: selectedIds.size })}</span>
           <Button variant="outline" size="sm" onClick={() => handleBulkAction('activate')}>
-            <Check className="mr-1 h-3.5 w-3.5" />批量启用
+            <Check className="mr-1 h-3.5 w-3.5" />{t('users.bulkActivate')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => handleBulkAction('suspend')}>
-            <X className="mr-1 h-3.5 w-3.5" />批量停用
+            <X className="mr-1 h-3.5 w-3.5" />{t('users.bulkSuspend')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportCSV}>
-            <Download className="mr-1 h-3.5 w-3.5" />导出 CSV
+            <Download className="mr-1 h-3.5 w-3.5" />{t('users.exportCSV')}
           </Button>
         </div>
       )}
@@ -200,9 +198,9 @@ export function UsersPage() {
       <Card>
         <CardHeader className="pb-0">
           <CardTitle className="text-base">
-            用户列表
+            {t('users.userList')}
             <span className="ml-2 text-sm font-normal text-muted-foreground">
-              共 {pagination.total} 人
+              {t('users.totalPeople', { total: pagination.total })}
             </span>
           </CardTitle>
         </CardHeader>
@@ -213,11 +211,11 @@ export function UsersPage() {
             </div>
           ) : error ? (
             <div className="flex h-48 items-center justify-center">
-              <p className="text-sm text-destructive">加载失败，请刷新重试</p>
+              <p className="text-sm text-destructive">{t('users.loadFailed')}</p>
             </div>
           ) : users.length === 0 ? (
             <div className="flex h-48 items-center justify-center">
-              <p className="text-sm text-muted-foreground">暂无用户数据</p>
+              <p className="text-sm text-muted-foreground">{t('users.noUsers')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -233,22 +231,22 @@ export function UsersPage() {
                       />
                     </TableHead>
                     <TableHead className="cursor-pointer" onClick={() => handleSort('full_name')}>
-                      姓名 <SortIcon column="full_name" />
+                      {t('users.name')} <SortIcon column="full_name" />
                     </TableHead>
                     <TableHead className="cursor-pointer" onClick={() => handleSort('email')}>
-                      邮箱 <SortIcon column="email" />
+                      {t('users.email')} <SortIcon column="email" />
                     </TableHead>
-                    <TableHead>手机号</TableHead>
+                    <TableHead>{t('users.phone')}</TableHead>
                     <TableHead className="cursor-pointer" onClick={() => handleSort('role')}>
-                      角色 <SortIcon column="role" />
+                      {t('users.role')} <SortIcon column="role" />
                     </TableHead>
                     <TableHead className="cursor-pointer" onClick={() => handleSort('status')}>
-                      状态 <SortIcon column="status" />
+                      {t('users.status')} <SortIcon column="status" />
                     </TableHead>
                     <TableHead className="cursor-pointer" onClick={() => handleSort('created_at')}>
-                      注册时间 <SortIcon column="created_at" />
+                      {t('users.registrationTime')} <SortIcon column="created_at" />
                     </TableHead>
-                    <TableHead className="w-20">操作</TableHead>
+                    <TableHead className="w-20">{t('users.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -267,7 +265,7 @@ export function UsersPage() {
                           <Avatar className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                             {(user.full_name || user.email)[0]?.toUpperCase() || '?'}
                           </Avatar>
-                          <span className="font-medium">{user.full_name || '未命名'}</span>
+                          <span className="font-medium">{user.full_name || t('users.unnamed')}</span>
                         </Link>
                       </TableCell>
                       <TableCell>
@@ -288,12 +286,12 @@ export function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={roleColors[user.role] || 'secondary'}>
-                          {roleLabels[user.role] || user.role}
+                          {t(`users.${user.role}` as any) || user.role}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={statusColors[user.status] || 'secondary'}>
-                          {user.status === 'active' ? '正常' : '停用'}
+                          {user.status === 'active' ? t('users.active') : t('users.suspended')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -325,7 +323,7 @@ export function UsersPage() {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            第 {pagination.page} / {pagination.totalPages} 页，共 {pagination.total} 条
+            {t('users.pageOfTotal', { page: pagination.page, totalPages: pagination.totalPages, total: pagination.total })}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -334,7 +332,7 @@ export function UsersPage() {
               disabled={page <= 1}
               onClick={() => { setPage(page - 1); setSelectedIds(new Set()); }}
             >
-              <ChevronLeft className="h-4 w-4" />上一页
+              <ChevronLeft className="h-4 w-4" />{t('common.previousPage')}
             </Button>
             <Button
               variant="outline"
@@ -342,7 +340,7 @@ export function UsersPage() {
               disabled={page >= pagination.totalPages}
               onClick={() => { setPage(page + 1); setSelectedIds(new Set()); }}
             >
-              下一页<ChevronRight className="h-4 w-4" />
+              {t('common.nextPage')}<ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

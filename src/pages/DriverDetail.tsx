@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/table";
 import { ArrowLeft, Star, Phone, Mail, Bike, Car, Truck, MapPin, Clock, TrendingUp, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function DriverDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { data, isLoading, error } = useDriver(id || "");
   const updateDriver = useUpdateDriver();
   const deleteDriver = useDeleteDriver();
@@ -29,14 +31,14 @@ export default function DriverDetailPage() {
 
   const handleDelete = () => {
     if (!driver) return;
-    if (window.confirm("确定要删除该骑手吗？此操作不可撤销。")) {
+    if (window.confirm(t("driverDetail.deleteConfirm"))) {
       deleteDriver.mutate(driver.id);
       navigate("/drivers");
     }
   };
 
-  if (isLoading) return <div className="py-20 text-center text-muted-foreground">加载中...</div>;
-  if (error || !driver) return <div className="py-20 text-center text-red-500">加载失败或骑手不存在</div>;
+  if (isLoading) return <div className="py-20 text-center text-muted-foreground">{t("driverDetail.loading")}</div>;
+  if (error || !driver) return <div className="py-20 text-center text-red-500">{t("driverDetail.loadFailed")}</div>;
 
   const vehicleIcon = driver.vehicle_type === "小型汽车" ? <Car className="h-5 w-5" /> :
     driver.vehicle_type === "三轮车" ? <Truck className="h-5 w-5" /> : <Bike className="h-5 w-5" />;
@@ -48,7 +50,7 @@ export default function DriverDetailPage() {
     <div className="space-y-6">
       {/* Back button */}
       <Button variant="ghost" size="sm" onClick={() => navigate("/drivers")}>
-        <ArrowLeft className="h-4 w-4 mr-2" /> 返回骑手列表
+        <ArrowLeft className="h-4 w-4 mr-2" /> {t("driverDetail.backToDrivers")}
       </Button>
 
       {/* Profile Card */}
@@ -61,10 +63,10 @@ export default function DriverDetailPage() {
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold">{driver.full_name}</h1>
               <Badge variant={driver.status === "approved" ? "success" : "warning"}>
-                {driver.status === "approved" ? "已认证" : "待认证"}
+                {driver.status === "approved" ? t("driverDetail.verified") : t("driverDetail.pendingVerify")}
               </Badge>
               <Badge variant={driver.is_available === "true" ? "success" : "secondary"}>
-                {driver.is_available === "true" ? "在线" : "离线"}
+                {driver.is_available === "true" ? t("driverDetail.online") : t("driverDetail.offlineLabel")}
               </Badge>
             </div>
             <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
@@ -76,48 +78,48 @@ export default function DriverDetailPage() {
           </div>
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" onClick={handleToggleStatus}>
-              {driver.status === "approved" ? "取消认证" : "认证通过"}
+              {driver.status === "approved" ? t("driverDetail.unverify") : t("driverDetail.approve")}
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>删除</Button>
+            <Button variant="destructive" onClick={handleDelete}>{t("driverDetail.delete")}</Button>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-          <StatsCard icon={<TrendingUp className="h-5 w-5" />} label="总配送单" value={stats.total.toString()} color="text-blue-600" bg="bg-blue-50" />
-          <StatsCard icon={<CheckCircle className="h-5 w-5" />} label="完成配送" value={stats.completed.toString()} color="text-green-600" bg="bg-green-50" />
-          <StatsCard icon={<Clock className="h-5 w-5" />} label="平均配送时间" value={stats.avgTime} color="text-amber-600" bg="bg-amber-50" />
-          <StatsCard icon={<DollarSign className="h-5 w-5" />} label="总收入" value={formatCurrency(parseFloat(driver.total_earnings || "0"))} color="text-primary" bg="bg-primary/5" />
+          <StatsCard icon={<TrendingUp className="h-5 w-5" />} label={t("driverDetail.totalDeliveries")} value={stats.total.toString()} color="text-blue-600" bg="bg-blue-50" />
+          <StatsCard icon={<CheckCircle className="h-5 w-5" />} label={t("driverDetail.completedDeliveries")} value={stats.completed.toString()} color="text-green-600" bg="bg-green-50" />
+          <StatsCard icon={<Clock className="h-5 w-5" />} label={t("driverDetail.avgDeliveryTime")} value={stats.avgTime} color="text-amber-600" bg="bg-amber-50" />
+          <StatsCard icon={<DollarSign className="h-5 w-5" />} label={t("driverDetail.totalEarnings")} value={formatCurrency(parseFloat(driver.total_earnings || "0"))} color="text-primary" bg="bg-primary/5" />
         </div>
       </Card>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">概览</TabsTrigger>
-          <TabsTrigger value="deliveries">配送历史</TabsTrigger>
-          <TabsTrigger value="transactions">交易记录</TabsTrigger>
+          <TabsTrigger value="overview">{t("driverDetail.overview")}</TabsTrigger>
+          <TabsTrigger value="deliveries">{t("driverDetail.deliveryHistory")}</TabsTrigger>
+          <TabsTrigger value="transactions">{t("driverDetail.transactions")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">配送统计</h3>
+            <h3 className="font-semibold mb-4">{t("driverDetail.deliveryStats")}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl font-bold">{stats.total}</div>
-                <div className="text-xs text-muted-foreground mt-1">总配送单</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("driverDetail.totalDeliveries")}</div>
               </div>
               <div className="p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-                <div className="text-xs text-muted-foreground mt-1">已完成</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("driverDetail.completed")}</div>
               </div>
               <div className="p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl font-bold text-amber-600">{stats.inProgress}</div>
-                <div className="text-xs text-muted-foreground mt-1">进行中</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("driverDetail.inProgress")}</div>
               </div>
               <div className="p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl font-bold">{successRate}%</div>
-                <div className="text-xs text-muted-foreground mt-1">成功率</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("driverDetail.successRate")}</div>
               </div>
             </div>
           </Card>
@@ -125,20 +127,20 @@ export default function DriverDetailPage() {
 
         <TabsContent value="deliveries" className="mt-4">
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">配送历史</h3>
+            <h3 className="font-semibold mb-4">{t("driverDetail.deliveryHistory")}</h3>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>配送编号</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>距离</TableHead>
-                  <TableHead>配送费</TableHead>
-                  <TableHead>完成时间</TableHead>
+                  <TableHead>{t("driverDetail.deliveryId")}</TableHead>
+                  <TableHead>{t("drivers.status")}</TableHead>
+                  <TableHead>{t("driverDetail.distance")}</TableHead>
+                  <TableHead>{t("driverDetail.deliveryFee")}</TableHead>
+                  <TableHead>{t("driverDetail.completedTime")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {driver.deliveries?.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">暂无配送记录</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t("driverDetail.noDeliveryRecords")}</TableCell></TableRow>
                 ) : (
                   driver.deliveries?.map((d) => (
                     <TableRow key={d.id}>
@@ -148,7 +150,7 @@ export default function DriverDetailPage() {
                           d.status === "completed" ? "success" :
                           d.status === "in_transit" ? "warning" : "secondary"
                         }>
-                          {d.status === "completed" ? "已完成" : d.status === "in_transit" ? "配送中" : "已分配"}
+                          {d.status === "completed" ? t("driverDetail.completed") : d.status === "in_transit" ? t("driverDetail.delivering") : t("driverDetail.assigned")}
                         </Badge>
                       </TableCell>
                       <TableCell>{d.distance} km</TableCell>
@@ -166,35 +168,35 @@ export default function DriverDetailPage() {
 
         <TabsContent value="transactions" className="mt-4">
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">交易记录</h3>
+            <h3 className="font-semibold mb-4">{t("driverDetail.transactions")}</h3>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>类型</TableHead>
-                  <TableHead>金额</TableHead>
-                  <TableHead>描述</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>时间</TableHead>
+                  <TableHead>{t("driverDetail.type")}</TableHead>
+                  <TableHead>{t("driverDetail.amount")}</TableHead>
+                  <TableHead>{t("driverDetail.description")}</TableHead>
+                  <TableHead>{t("drivers.status")}</TableHead>
+                  <TableHead>{t("driverDetail.time")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {driver.transactions?.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">暂无交易记录</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t("driverDetail.noTransactionRecords")}</TableCell></TableRow>
                 ) : (
-                  driver.transactions?.map((t) => (
-                    <TableRow key={t.id}>
+                  driver.transactions?.map((tx) => (
+                    <TableRow key={tx.id}>
                       <TableCell>
-                        <Badge variant="outline">{t.type}</Badge>
+                        <Badge variant="outline">{tx.type}</Badge>
                       </TableCell>
-                      <TableCell className="font-medium">{formatCurrency(t.amount as unknown as number | string)}</TableCell>
-                      <TableCell className="text-muted-foreground">{t.description}</TableCell>
+                      <TableCell className="font-medium">{formatCurrency(tx.amount as unknown as number | string)}</TableCell>
+                      <TableCell className="text-muted-foreground">{tx.description}</TableCell>
                       <TableCell>
-                        <Badge variant={t.status === "completed" ? "success" : "warning"}>
-                          {t.status === "completed" ? "已完成" : "待处理"}
+                        <Badge variant={tx.status === "completed" ? "success" : "warning"}>
+                          {tx.status === "completed" ? t("driverDetail.completed") : t("drivers.pendingVerify")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(t.created_at).toLocaleDateString()}
+                        {new Date(tx.created_at).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
                   ))

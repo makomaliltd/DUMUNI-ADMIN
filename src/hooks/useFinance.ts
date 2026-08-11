@@ -20,10 +20,13 @@ export function useFinanceOverview() {
       totalCommission: number; revenueByMonth: { month: string; revenue: number; commission: number }[];
       revenueByRestaurant: { name: string; revenue: number }[];
       commissionBreakdown: { name: string; value: number }[];
+      incomeSourceDistribution: { name: string; value: number }[];
     }>(`${API}/overview`),
     refetchInterval: 60_000,
   });
 }
+
+export const useFinanceDashboard = useFinanceOverview;
 
 // === Withdrawals ===
 export function useWithdrawals(params: {
@@ -37,9 +40,13 @@ export function useWithdrawals(params: {
   if (params.type) qs.set('type', params.type);
   if (params.startDate) qs.set('startDate', params.startDate);
   if (params.endDate) qs.set('endDate', params.endDate);
+  const pageSize = params.pageSize || 10;
   return useQuery({
     queryKey: ['withdrawals', params],
-    queryFn: () => fetchJSON<{ data: Withdrawal[]; total: number }>(`${API}/withdrawals?${qs}`),
+    queryFn: async () => {
+      const res = await fetchJSON<{ data: Withdrawal[]; total: number }>(`${API}/withdrawals?${qs}`);
+      return { ...res, totalPages: Math.ceil(res.total / pageSize) || 1 };
+    },
   });
 }
 
@@ -54,11 +61,11 @@ export function useWithdrawalDetail(id: string) {
 export function useUpdateWithdrawalStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status, reason }: { id: string; status: string; reason?: string }) =>
+    mutationFn: ({ id, status, action, reason }: { id: string; status?: string; action?: string; reason?: string }) =>
       fetchJSON(`${API}/withdrawals/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, reason }),
+        body: JSON.stringify({ status, action, reason }),
       }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['withdrawals'] }); qc.invalidateQueries({ queryKey: ['finance'] }); },
   });
@@ -91,7 +98,10 @@ export function useTransactions(params: {
   if (params.endDate) qs.set('endDate', params.endDate);
   return useQuery({
     queryKey: ['transactions', params],
-    queryFn: () => fetchJSON<{ data: Transaction[]; total: number }>(`/api/transactions?${qs}`),
+    queryFn: async () => {
+      const res = await fetchJSON<{ data: Transaction[]; total: number }>(`/api/transactions?${qs}`);
+      return { transactions: res.data, total: res.total };
+    },
   });
 }
 
@@ -100,6 +110,10 @@ interface Transaction {
   id: string; user_id?: string; type: string; amount: number;
   description: string; status: string; created_at: string;
 }
+
+export const useFinanceTransactions = useTransactions;
+
+export const useProcessWithdrawal = useUpdateWithdrawalStatus;
 
 // === Settings ===
 export function useFinancialSettings() {

@@ -11,27 +11,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ChevronDown, ChevronUp, Download, Eye, Search, Truck, RefreshCw, Volume2, VolumeX } from 'lucide-react';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, type OrderStatus, type Order } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const statusOptions = [
-  { value: 'all', label: '全部状态' },
-  { value: 'pending', label: '待处理' },
-  { value: 'accepted', label: '已接单' },
-  { value: 'preparing', label: '准备中' },
-  { value: 'ready', label: '已备好' },
-  { value: 'delivering', label: '配送中' },
-  { value: 'delivered', label: '已送达' },
-  { value: 'cancelled', label: '已取消' },
-  { value: 'rejected', label: '已拒绝' },
+  { value: 'all', labelKey: 'orders.allStatus' },
+  { value: 'pending', labelKey: 'orders.pending' },
+  { value: 'accepted', labelKey: 'orders.accepted' },
+  { value: 'preparing', labelKey: 'orders.preparing' },
+  { value: 'ready', labelKey: 'orders.ready' },
+  { value: 'delivering', labelKey: 'orders.delivering' },
+  { value: 'delivered', labelKey: 'orders.delivered' },
+  { value: 'cancelled', labelKey: 'orders.cancelled' },
+  { value: 'rejected', labelKey: 'orders.rejected' },
 ];
 
 const paymentOptions = [
-  { value: 'all', label: '全部支付' },
-  { value: 'pending', label: '待支付' },
-  { value: 'paid', label: '已支付' },
-  { value: 'refunded', label: '已退款' },
+  { value: 'all', labelKey: 'orders.allPayment' },
+  { value: 'pending', labelKey: 'orders.paymentPending' },
+  { value: 'paid', labelKey: 'orders.paid' },
+  { value: 'refunded', labelKey: 'orders.refunded' },
 ];
 
 export default function Orders() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -124,7 +126,7 @@ export default function Orders() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['订单ID', '顾客', '餐厅', '骑手', '金额', '状态', '支付状态', '下单时间'];
+    const headers = t('orders.csvHeaders').split(',');
     const rows = orders.map((o: any) => [
       o.id.slice(0, 8), o.customer_name, o.restaurant_name || '', o.driver_name || '',
       o.amount, ORDER_STATUS_LABELS[o.status as OrderStatus] || o.status, o.payment_status,
@@ -142,23 +144,23 @@ export default function Orders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">订单管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">共 {total} 条订单</p>
+          <h1 className="text-2xl font-bold">{t('orders.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('orders.totalOrders').replace('{total}', String(total))}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
             onClick={() => setSoundEnabled(!soundEnabled)}
-            title={soundEnabled ? '关闭新订单提示音' : '开启新订单提示音'}
+            title={soundEnabled ? t('orders.soundOn') : t('orders.soundOff')}
           >
             {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </Button>
           <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}>
-            <RefreshCw className="h-4 w-4 mr-2" />刷新
+            <RefreshCw className="h-4 w-4 mr-2" />{t('orders.refresh')}
           </Button>
           <Button variant="outline" onClick={handleExportCSV}>
-            <Download className="h-4 w-4 mr-2" />导出 CSV
+            <Download className="h-4 w-4 mr-2" />{t('orders.exportCSV')}
           </Button>
         </div>
       </div>
@@ -169,7 +171,7 @@ export default function Orders() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="搜索订单 ID..."
+              placeholder={t('orders.searchPlaceholder')}
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
               className="pl-9"
@@ -179,7 +181,7 @@ export default function Orders() {
             <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               {statusOptions.map(o => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value}>{t(o.labelKey)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -187,31 +189,31 @@ export default function Orders() {
             <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               {paymentOptions.map(o => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value}>{t(o.labelKey)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Button variant="ghost" onClick={() => setShowFilters(!showFilters)}>
             {showFilters ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
-            更多筛选
+            {t('orders.moreFilters')}
           </Button>
         </div>
         {showFilters && (
           <div className="grid grid-cols-4 gap-3 mt-4">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">开始日期</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t('orders.dateFrom')}</label>
               <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">结束日期</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t('orders.dateTo')}</label>
               <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">最低金额</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t('orders.amountMin')}</label>
               <Input type="number" placeholder="0" value={amountMin} onChange={e => setAmountMin(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">最高金额</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t('orders.amountMax')}</label>
               <Input type="number" placeholder="9999" value={amountMax} onChange={e => setAmountMax(e.target.value)} />
             </div>
           </div>
@@ -221,14 +223,14 @@ export default function Orders() {
       {/* Bulk actions */}
       {selectedIds.size > 0 && (
         <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
-          <span className="text-sm font-medium">已选 {selectedIds.size} 条</span>
+          <span className="text-sm font-medium">{t('orders.selected').replace('{count}', String(selectedIds.size))}</span>
           <Button size="sm" variant="outline" onClick={() => setAssignDialogOpen(true)}>
-            <Truck className="h-3.5 w-3.5 mr-1.5" />分配骑手
+            <Truck className="h-3.5 w-3.5 mr-1.5" />{t('orders.assignDriver')}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setStatusDialogOpen(true)}>
-            批量更新状态
+            {t('orders.bulkUpdateStatus')}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>取消选择</Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>{t('orders.deselectAll')}</Button>
         </div>
       )}
 
@@ -246,32 +248,32 @@ export default function Orders() {
                     className="rounded border-gray-300"
                   />
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">订单 ID</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">顾客</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">餐厅</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">骑手</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.orderId')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.customer')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.restaurant')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.driver')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">
                   <button onClick={() => { setSortBy('amount'); setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc'); }} className="hover:text-foreground">
-                    金额 {sortBy === 'amount' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}
+                    {t('orders.total')} {sortBy === 'amount' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">状态</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">支付</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.status')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.payment')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">
                   <button onClick={() => { setSortBy('created_at'); setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc'); }} className="hover:text-foreground">
-                    时间 {sortBy === 'created_at' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}
+                    {t('orders.createdAt')} {sortBy === 'created_at' ? (sortOrder === 'desc' ? '↓' : '↑') : ''}
                   </button>
                 </th>
-                <th className="w-20 px-4 py-3 text-xs font-medium text-muted-foreground">操作</th>
+                <th className="w-20 px-4 py-3 text-xs font-medium text-muted-foreground">{t('orders.actions')}</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={10} className="text-center py-12 text-muted-foreground">加载中...</td></tr>
+                <tr><td colSpan={10} className="text-center py-12 text-muted-foreground">{t('orders.loading')}</td></tr>
               ) : error ? (
-                <tr><td colSpan={10} className="text-center py-12 text-red-500">加载失败</td></tr>
+                <tr><td colSpan={10} className="text-center py-12 text-red-500">{t('orders.loadError')}</td></tr>
               ) : orders.length === 0 ? (
-                <tr><td colSpan={10} className="text-center py-12 text-muted-foreground">暂无订单</td></tr>
+                <tr><td colSpan={10} className="text-center py-12 text-muted-foreground">{t('orders.noOrders')}</td></tr>
               ) : (
                 orders.map((order: any) => (
                   <tr key={order.id} className="border-b hover:bg-muted/30 transition-colors">
@@ -295,7 +297,7 @@ export default function Orders() {
                         {ORDER_STATUS_LABELS[order.status as OrderStatus] || order.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-sm">{order.payment_status === 'paid' ? '已支付' : order.payment_status === 'pending' ? '待支付' : order.payment_status}</td>
+                    <td className="px-4 py-3 text-sm">{order.payment_status === 'paid' ? t('orders.paid') : order.payment_status === 'pending' ? t('orders.paymentPending') : order.payment_status === 'refunded' ? t('orders.refunded') : order.payment_status}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(order.created_at).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </td>
@@ -315,9 +317,9 @@ export default function Orders() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">第 {page}/{totalPages} 页</span>
+          <span className="text-sm text-muted-foreground">{t('orders.pageInfo').replace('{page}', String(page)).replace('{totalPages}', String(totalPages))}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>上一页</Button>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>{t('orders.previous')}</Button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const start = Math.max(1, Math.min(page - 2, totalPages - 4));
               const p = start + i;
@@ -328,7 +330,7 @@ export default function Orders() {
                 </Button>
               );
             })}
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>下一页</Button>
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>{t('orders.next')}</Button>
           </div>
         </div>
       )}
@@ -336,21 +338,21 @@ export default function Orders() {
       {/* Assign Driver Dialog */}
       <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>批量分配骑手</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('orders.bulkAssignDriver')}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">为 {selectedIds.size} 条订单分配骑手</p>
+            <p className="text-sm text-muted-foreground">{t('orders.assignDriverFor').replace('{count}', String(selectedIds.size))}</p>
             <Select value={bulkDriverId} onValueChange={setBulkDriverId}>
-              <SelectTrigger><SelectValue placeholder="选择骑手" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('orders.selectDriver')} /></SelectTrigger>
               <SelectContent>
                 {driversData?.data?.map((d: any) => (
                   <SelectItem key={d.id} value={d.id}>{d.full_name} - {d.phone} ({d.vehicle_type})</SelectItem>
-                )) || <SelectItem value="__none__">暂无可用骑手</SelectItem>}
+                )) || <SelectItem value="__none__">{t('orders.noDriversAvailable')}</SelectItem>}
               </SelectContent>
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>取消</Button>
-            <Button onClick={handleBulkAssign} disabled={!bulkDriverId}>确认分配</Button>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={handleBulkAssign} disabled={!bulkDriverId}>{t('orders.confirmAssign')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -358,21 +360,21 @@ export default function Orders() {
       {/* Bulk Status Dialog */}
       <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>批量更新状态</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('orders.bulkUpdateStatus')}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">更新 {selectedIds.size} 条订单的状态</p>
+            <p className="text-sm text-muted-foreground">{t('orders.updateStatusFor').replace('{count}', String(selectedIds.size))}</p>
             <Select value={bulkStatus} onValueChange={(v) => setBulkStatus(v as OrderStatus)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {statusOptions.filter(o => o.value !== 'all').map(o => (
-                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  <SelectItem key={o.value} value={o.value}>{t(o.labelKey)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>取消</Button>
-            <Button onClick={handleBulkStatus}>确认更新</Button>
+            <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={handleBulkStatus}>{t('orders.confirmUpdate')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

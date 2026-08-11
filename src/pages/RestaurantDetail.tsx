@@ -18,11 +18,13 @@ import {
   TrendingUp, BarChart3, MoreHorizontal, Edit, RotateCcw,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { useLanguage } from '@/contexts/LanguageContext';
 import EditRestaurantModal from '@/components/EditRestaurantModal';
 import MenuItemModal from '@/components/MenuItemModal';
 import { formatCurrency } from '@/lib/utils';
 
 export default function RestaurantDetail() {
+  const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: restaurantRes, isLoading } = useRestaurant(id);
@@ -53,8 +55,8 @@ export default function RestaurantDetail() {
   if (!restaurant) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground text-lg">餐厅未找到</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate('/restaurants')}>返回列表</Button>
+        <p className="text-muted-foreground text-lg">{t('restaurantDetail.notFound')}</p>
+        <Button variant="outline" className="mt-4" onClick={() => navigate('/restaurants')}>{t('restaurantDetail.backToRestaurants')}</Button>
       </div>
     );
   }
@@ -78,13 +80,13 @@ export default function RestaurantDetail() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-foreground">{restaurantData.name}</h1>
               {restaurantData.verified === 'verified'
-                ? <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />已验证</Badge>
-                : <Badge variant="warning">待审核</Badge>}
+                ? <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />{t('restaurants.verified')}</Badge>
+                : <Badge variant="warning">{t('restaurants.pending')}</Badge>}
             </div>
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1"><ChefHat className="w-3.5 h-3.5" />{restaurantData.cuisine_type}</span>
               <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />{restaurantData.rating || '0.0'}</span>
-              <span className="flex items-center gap-1"><ShoppingCart className="w-3.5 h-3.5" />{restaurantData.total_orders} 单</span>
+              <span className="flex items-center gap-1"><ShoppingCart className="w-3.5 h-3.5" />{restaurantData.total_orders}</span>
             </div>
           </div>
         </div>
@@ -94,10 +96,10 @@ export default function RestaurantDetail() {
             onClick={() => toggleStatus.mutate(id!)}
           >
             <RotateCcw className="w-4 h-4 mr-1" />
-            {restaurantData.is_open === 'true' ? '打烊' : '营业'}
+            {restaurantData.is_open === 'true' ? t('restaurants.closeShop') : t('restaurants.openShop')}
           </Button>
           <Button size="sm" onClick={() => setEditModalOpen(true)}>
-            <Edit className="w-4 h-4 mr-1" />编辑
+            <Edit className="w-4 h-4 mr-1" />{t('common.edit')}
           </Button>
         </div>
       </div>
@@ -110,8 +112,8 @@ export default function RestaurantDetail() {
               <MapPin className="w-5 h-5 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">地址</p>
-              <p className="text-sm font-medium truncate">{restaurantData.address || '未设置'}</p>
+              <p className="text-xs text-muted-foreground">{t('restaurantDetail.address')}</p>
+              <p className="text-sm font-medium truncate">{restaurantData.address || t('restaurantDetail.notSet')}</p>
             </div>
           </CardContent>
         </Card>
@@ -121,8 +123,8 @@ export default function RestaurantDetail() {
               <Phone className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">联系电话</p>
-              <p className="text-sm font-medium">{restaurantData.phone || '未设置'}</p>
+              <p className="text-xs text-muted-foreground">{t('restaurantDetail.phone')}</p>
+              <p className="text-sm font-medium">{restaurantData.phone || t('restaurantDetail.notSet')}</p>
             </div>
           </CardContent>
         </Card>
@@ -132,8 +134,8 @@ export default function RestaurantDetail() {
               <Clock className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">营业时间</p>
-              <p className="text-sm font-medium">{restaurantData.hours || '未设置'}</p>
+              <p className="text-xs text-muted-foreground">{t('restaurantDetail.hours')}</p>
+              <p className="text-sm font-medium">{restaurantData.hours || t('restaurantDetail.notSet')}</p>
             </div>
           </CardContent>
         </Card>
@@ -143,7 +145,7 @@ export default function RestaurantDetail() {
               <DollarSign className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">配送费 / 起送价</p>
+              <p className="text-xs text-muted-foreground">{t('restaurantDetail.deliveryFeeMinOrder')}</p>
               <p className="text-sm font-medium">{formatCurrency(restaurantData.delivery_fee || 0)} / {formatCurrency(restaurantData.min_order || 0)}</p>
             </div>
           </CardContent>
@@ -159,11 +161,11 @@ export default function RestaurantDetail() {
               value={tab}
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 bg-transparent px-4 py-3 text-sm font-medium data-[state=active]:text-orange-600"
             >
-              {tab === 'info' && '基本信息'}
-              {tab === 'menu' && '菜单管理'}
-              {tab === 'orders' && '订单记录'}
-              {tab === 'reviews' && '用户评价'}
-              {tab === 'analytics' && '经营分析'}
+              {tab === 'info' && t('restaurantDetail.basicInfo')}
+              {tab === 'menu' && t('restaurantDetail.menuManagement')}
+              {tab === 'orders' && t('restaurantDetail.orderRecords')}
+              {tab === 'reviews' && t('restaurantDetail.customerReviews')}
+              {tab === 'analytics' && t('restaurantDetail.businessAnalytics')}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -172,28 +174,28 @@ export default function RestaurantDetail() {
         <TabsContent value="info" className="pt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">餐厅资料</CardTitle>
+              <CardTitle className="text-base">{t('restaurantDetail.restaurantProfile')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-muted-foreground">餐厅名称</label>
+                  <label className="text-xs text-muted-foreground">{t('restaurants.name')}</label>
                   <p className="text-sm font-medium">{restaurantData.name}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">菜系</label>
+                  <label className="text-xs text-muted-foreground">{t('restaurants.category')}</label>
                   <p className="text-sm font-medium">{restaurantData.cuisine_type}</p>
                 </div>
                 <div className="col-span-2">
-                  <label className="text-xs text-muted-foreground">描述</label>
-                  <p className="text-sm">{restaurantData.description || '暂无描述'}</p>
+                  <label className="text-xs text-muted-foreground">{t('restaurantDetail.description')}</label>
+                  <p className="text-sm">{restaurantData.description || t('restaurantDetail.noDescription')}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">负责人</label>
-                  <p className="text-sm font-medium">{restaurantData.owner?.full_name || '未分配'}</p>
+                  <label className="text-xs text-muted-foreground">{t('restaurants.owner')}</label>
+                  <p className="text-sm font-medium">{restaurantData.owner?.full_name || t('restaurantDetail.notAssigned')}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">负责人邮箱</label>
+                  <label className="text-xs text-muted-foreground">{t('restaurantDetail.ownerEmail')}</label>
                   <p className="text-sm">{restaurantData.owner?.email || '—'}</p>
                 </div>
               </div>
@@ -205,28 +207,28 @@ export default function RestaurantDetail() {
         <TabsContent value="menu" className="pt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">菜品列表</CardTitle>
+              <CardTitle className="text-base">{t('restaurantDetail.menuItems')}</CardTitle>
               <Button size="sm" onClick={() => { setEditMenuItem(null); setMenuModalOpen(true); }}>
-                <Plus className="w-4 h-4 mr-1" />添加菜品
+                <Plus className="w-4 h-4 mr-1" />{t('restaurantDetail.addMenuItem')}
               </Button>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>菜品名称</TableHead>
-                    <TableHead>分类</TableHead>
-                    <TableHead>价格</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>推荐</TableHead>
-                    <TableHead className="text-right">操作</TableHead>
+                    <TableHead>{t('restaurantDetail.itemName')}</TableHead>
+                    <TableHead>{t('restaurantDetail.category')}</TableHead>
+                    <TableHead>{t('restaurantDetail.price')}</TableHead>
+                    <TableHead>{t('restaurantDetail.status')}</TableHead>
+                    <TableHead>{t('restaurantDetail.recommended')}</TableHead>
+                    <TableHead className="text-right">{t('restaurants.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {menuItems.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        暂未添加菜品
+                        {t('restaurantDetail.noMenuItems')}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -246,12 +248,12 @@ export default function RestaurantDetail() {
                         <TableCell className="text-sm font-medium">{formatCurrency(item.price)}</TableCell>
                         <TableCell>
                           {item.is_available === 'true'
-                            ? <Badge variant="success" className="bg-emerald-500">在售</Badge>
-                            : <Badge variant="secondary">已下架</Badge>}
+                            ? <Badge variant="success" className="bg-emerald-500">{t('restaurantDetail.available')}</Badge>
+                            : <Badge variant="secondary">{t('restaurantDetail.unavailable')}</Badge>}
                         </TableCell>
                         <TableCell>
                           {item.is_popular === 'true'
-                            ? <Badge variant="default" className="bg-amber-500">推荐</Badge>
+                            ? <Badge variant="default" className="bg-amber-500">{t('restaurantDetail.recommended')}</Badge>
                             : <span className="text-sm text-muted-foreground">—</span>}
                         </TableCell>
                         <TableCell className="text-right">
@@ -260,7 +262,7 @@ export default function RestaurantDetail() {
                               <Pencil className="w-4 h-4" />
                             </Button>
                             <Button variant="ghost" size="icon" className="w-8 h-8 text-red-500 hover:text-red-600" onClick={async () => {
-                              if (confirm('确定删除该菜品？')) {
+                              if (confirm(t('restaurantDetail.confirmDeleteItem'))) {
                                 // handled by mutation
                               }
                             }}>
@@ -281,23 +283,23 @@ export default function RestaurantDetail() {
         <TabsContent value="orders" className="pt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">订单记录</CardTitle>
+              <CardTitle className="text-base">{t('restaurantDetail.orderRecords')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>订单号</TableHead>
-                    <TableHead>客户</TableHead>
-                    <TableHead>金额</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>时间</TableHead>
+                    <TableHead>{t('restaurantDetail.orderId')}</TableHead>
+                    <TableHead>{t('restaurantDetail.customer')}</TableHead>
+                    <TableHead>{t('restaurantDetail.amount')}</TableHead>
+                    <TableHead>{t('restaurantDetail.status')}</TableHead>
+                    <TableHead>{t('restaurantDetail.time')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {orders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">暂无订单</TableCell>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('restaurantDetail.noOrders')}</TableCell>
                     </TableRow>
                   ) : (
                     orders.map((order: any) => (
@@ -307,7 +309,7 @@ export default function RestaurantDetail() {
                         <TableCell className="text-sm font-medium">{formatCurrency(order.amount)}</TableCell>
                         <TableCell>
                           <Badge variant={order.status === 'completed' ? 'success' : order.status === 'active' ? 'default' : order.status === 'cancelled' ? 'destructive' : 'warning'}>
-                            {order.status === 'completed' ? '已完成' : order.status === 'active' ? '进行中' : order.status === 'cancelled' ? '已取消' : '待处理'}
+                            {order.status === 'completed' ? t('restaurantDetail.completed') : order.status === 'active' ? t('restaurantDetail.inProgress') : order.status === 'cancelled' ? t('restaurantDetail.cancelled') : t('common.pending')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</TableCell>
@@ -324,23 +326,23 @@ export default function RestaurantDetail() {
         <TabsContent value="reviews" className="pt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">用户评价</CardTitle>
+              <CardTitle className="text-base">{t('restaurantDetail.customerReviews')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>用户</TableHead>
-                    <TableHead>评分</TableHead>
-                    <TableHead>内容</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>时间</TableHead>
+                    <TableHead>{t('restaurantDetail.user')}</TableHead>
+                    <TableHead>{t('restaurantDetail.rating')}</TableHead>
+                    <TableHead>{t('restaurantDetail.content')}</TableHead>
+                    <TableHead>{t('restaurantDetail.status')}</TableHead>
+                    <TableHead>{t('restaurantDetail.time')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {reviews.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">暂无评价</TableCell>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('restaurantDetail.noReviews')}</TableCell>
                     </TableRow>
                   ) : (
                     reviews.map((review: any) => (
@@ -356,7 +358,7 @@ export default function RestaurantDetail() {
                         <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{review.content}</TableCell>
                         <TableCell>
                           <Badge variant={review.status === 'approved' ? 'success' : 'warning'}>
-                            {review.status === 'approved' ? '已通过' : '待审核'}
+                            {review.status === 'approved' ? t('restaurantDetail.approved') : t('restaurants.pending')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{new Date(review.created_at).toLocaleDateString()}</TableCell>
@@ -375,26 +377,26 @@ export default function RestaurantDetail() {
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(analytics?.totalRevenue || 0)}</p>
-                <p className="text-xs text-muted-foreground mt-1">近30天收入</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('restaurantDetail.last30DaysRevenue')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-foreground">{analytics?.completedOrders || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">近30天订单</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('restaurantDetail.last30DaysOrders')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <p className="text-2xl font-bold text-foreground">{analytics?.avgRating?.toFixed(1) || '0.0'}</p>
-                <p className="text-xs text-muted-foreground mt-1">平均评分</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('restaurantDetail.avgRating')}</p>
               </CardContent>
             </Card>
           </div>
 
           <Card className="mb-4">
             <CardHeader>
-              <CardTitle className="text-base">近30天收入趋势</CardTitle>
+              <CardTitle className="text-base">{t('restaurantDetail.revenueTrend30Days')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[260px]">
@@ -405,7 +407,7 @@ export default function RestaurantDetail() {
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip
                       contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                      formatter={(value: any) => [formatCurrency(value as number), '收入']}
+                      formatter={(value: any) => [formatCurrency(value as number), t('restaurantDetail.revenue')]}
                     />
                     <Line type="monotone" dataKey="revenue" stroke="#FF6B00" strokeWidth={2} dot={false} />
                   </LineChart>
@@ -416,7 +418,7 @@ export default function RestaurantDetail() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">评分分布</CardTitle>
+              <CardTitle className="text-base">{t('restaurantDetail.ratingDistribution')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[200px]">

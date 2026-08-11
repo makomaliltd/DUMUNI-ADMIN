@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUpdateUser, type UserProfile } from '@/hooks/useUsers';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EditUserModalProps {
   open: boolean;
@@ -26,6 +27,7 @@ interface EditUserModalProps {
 }
 
 export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) {
+  const { t } = useLanguage();
   const updateUser = useUpdateUser();
   const [form, setForm] = useState({
     full_name: '',
@@ -51,12 +53,12 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
 
   function validate() {
     const errs: Record<string, string> = {};
-    if (!form.full_name.trim()) errs.full_name = '请输入姓名';
-    if (!form.email.trim()) errs.email = '请输入邮箱';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = '邮箱格式不正确';
-    if (form.phone && !/^\+?[1-9]\d{6,14}$/.test(form.phone)) errs.phone = '手机号格式不正确';
-    if (!form.role) errs.role = '请选择角色';
-    if (!form.status) errs.status = '请选择状态';
+    if (!form.full_name.trim()) errs.full_name = t('users.nameRequired');
+    if (!form.email.trim()) errs.email = t('users.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t('users.emailInvalid');
+    if (form.phone && !/^\+?[1-9]\d{6,14}$/.test(form.phone)) errs.phone = t('users.phoneInvalid');
+    if (!form.role) errs.role = t('users.roleRequired');
+    if (!form.status) errs.status = t('users.statusRequired');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -74,7 +76,7 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
       });
       onOpenChange(false);
     } catch {
-      setErrors({ submit: '更新失败，请重试' });
+      setErrors({ submit: t('users.updateFailed') });
     }
   }
 
@@ -82,73 +84,73 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>编辑用户</DialogTitle>
-          <DialogDescription>修改用户信息与权限设置</DialogDescription>
+          <DialogTitle>{t('users.editUser')}</DialogTitle>
+          <DialogDescription>{t('users.editUserDesc')}</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="edit-name">姓名</Label>
+            <Label htmlFor="edit-name">{t('users.fullName')}</Label>
             <Input
               id="edit-name"
               value={form.full_name}
               onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-              placeholder="请输入姓名"
+              placeholder={t('users.enterName')}
             />
             {errors.full_name && <p className="text-xs text-destructive">{errors.full_name}</p>}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="edit-email">邮箱</Label>
+            <Label htmlFor="edit-email">{t('users.email')}</Label>
             <Input
               id="edit-email"
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="请输入邮箱"
+              placeholder={t('users.enterEmail')}
             />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="edit-phone">手机号</Label>
+            <Label htmlFor="edit-phone">{t('users.phone')}</Label>
             <Input
               id="edit-phone"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="请输入手机号"
+              placeholder={t('users.enterPhone')}
             />
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label>角色</Label>
+              <Label>{t('users.role')}</Label>
               <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="选择角色" />
+                  <SelectValue placeholder={t('users.selectRole')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">管理员</SelectItem>
-                  <SelectItem value="editor">编辑</SelectItem>
-                  <SelectItem value="viewer">访客</SelectItem>
-                  <SelectItem value="buyer">买家</SelectItem>
-                  <SelectItem value="seller">商家</SelectItem>
-                  <SelectItem value="driver">骑手</SelectItem>
+                  <SelectItem value="admin">{t('users.admin')}</SelectItem>
+                  <SelectItem value="editor">{t('users.editor')}</SelectItem>
+                  <SelectItem value="viewer">{t('users.viewer')}</SelectItem>
+                  <SelectItem value="buyer">{t('users.buyer')}</SelectItem>
+                  <SelectItem value="seller">{t('users.seller')}</SelectItem>
+                  <SelectItem value="driver">{t('users.driver')}</SelectItem>
                 </SelectContent>
               </Select>
               {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
             </div>
 
             <div className="grid gap-2">
-              <Label>状态</Label>
+              <Label>{t('users.status')}</Label>
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="选择状态" />
+                  <SelectValue placeholder={t('users.selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">正常</SelectItem>
-                  <SelectItem value="suspended">停用</SelectItem>
+                  <SelectItem value="active">{t('users.active')}</SelectItem>
+                  <SelectItem value="suspended">{t('users.suspended')}</SelectItem>
                 </SelectContent>
               </Select>
               {errors.status && <p className="text-xs text-destructive">{errors.status}</p>}
@@ -161,9 +163,9 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('users.cancel')}</Button>
           <Button onClick={handleSubmit} disabled={updateUser.isPending}>
-            {updateUser.isPending ? '保存中...' : '保存'}
+            {updateUser.isPending ? t('users.saving') : t('users.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

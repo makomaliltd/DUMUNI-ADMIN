@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SupabaseConfigProvider } from '@/lib/supabase-config-inject';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { LanguageProvider } from '@/contexts/LanguageContext';
+import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ToastProvider } from '@/components/ui/toast';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -14,7 +15,7 @@ import { useRealtimeOrderNotifications } from '@/hooks/useRealtimeNotification';
 // Lazy loaded pages
 const LoginPage = lazy(() => import('@/pages/Login').then((m) => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/Dashboard'));
-const AnalyticsPage = lazy(() => import('@/pages/Analytics').then((m) => ({ default: m.AnalyticsPage })));
+const AnalyticsPage = lazy(() => import('@/pages/Analytics'));
 const ContentPage = lazy(() => import('@/pages/Content'));
 const OrdersPage = lazy(() => import('@/pages/Orders'));
 const OrderDetailPage = lazy(() => import('@/pages/OrderDetail'));
@@ -49,11 +50,12 @@ const queryClient = new QueryClient({
 });
 
 function PageLoading() {
+  const { t } = useLanguage();
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-sm text-muted-foreground">{t('loading.title')}</p>
       </div>
     </div>
   );
@@ -126,13 +128,15 @@ export function App() {
         <BrowserRouter>
           <AuthProvider>
             <LanguageProvider>
-            <ToastProvider>
-              <NotificationProvider>
-                <ErrorBoundary>
-                  <AppContent />
-                </ErrorBoundary>
-              </NotificationProvider>
-            </ToastProvider>
+              <ThemeProvider>
+                <ToastProvider>
+                  <NotificationProvider>
+                    <ErrorBoundary>
+                      <AppContent />
+                    </ErrorBoundary>
+                  </NotificationProvider>
+                </ToastProvider>
+              </ThemeProvider>
             </LanguageProvider>
           </AuthProvider>
         </BrowserRouter>

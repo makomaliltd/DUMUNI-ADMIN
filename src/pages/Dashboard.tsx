@@ -82,7 +82,7 @@ export default function Dashboard() {
     return (
       <div className="rounded-lg border bg-card px-3 py-2 text-sm shadow-lg">
         <p className="font-medium">{payload[0].name}</p>
-        <p className="text-muted-foreground">{payload[0].value} 单 ({pct}%)</p>
+        <p className="text-muted-foreground">{payload[0].value} {t('dashboard.orders')} ({pct}%)</p>
       </div>
     );
   };

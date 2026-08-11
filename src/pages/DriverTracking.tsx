@@ -8,6 +8,7 @@ import { RefreshCw, Navigation, Bike, Car, Truck, MapPin, RotateCcw } from "luci
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Fix Leaflet default icon
 const iconUrl = "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
@@ -58,6 +59,7 @@ function MapController({ drivers }: { drivers: Driver[] }) {
 
 export default function DriverTrackingPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { data, isLoading, refetch } = useActiveDrivers();
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
@@ -74,15 +76,15 @@ export default function DriverTrackingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">骑手实时追踪</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("driverTracking.liveTracking")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            当前在线骑手: <span className="font-semibold text-primary">{drivers.length}</span> 人
+            {t("driverTracking.onlineDrivers")}: <span className="font-semibold text-primary">{drivers.length}</span> {t("driverTracking.driversCount", { n: drivers.length })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate("/drivers")}>
             <Navigation className="h-4 w-4 mr-2" />
-            骑手列表
+            {t("driverTracking.driversList")}
           </Button>
           <Button
             variant={autoRefresh ? "default" : "outline"}
@@ -90,11 +92,11 @@ export default function DriverTrackingPage() {
             onClick={() => setAutoRefresh(!autoRefresh)}
           >
             <RotateCcw className={`h-4 w-4 mr-1.5 ${autoRefresh ? "animate-spin" : ""}`} />
-            自动刷新
+            {t("driverTracking.autoRefresh")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-1.5" />
-            刷新
+            {t("driverTracking.refresh")}
           </Button>
         </div>
       </div>
@@ -103,7 +105,7 @@ export default function DriverTrackingPage() {
         {/* Map */}
         <div className="lg:col-span-3 rounded-lg border overflow-hidden" style={{ height: "calc(100vh - 240px)", minHeight: 500 }}>
           {isLoading ? (
-            <div className="h-full flex items-center justify-center text-muted-foreground">加载地图数据...</div>
+            <div className="h-full flex items-center justify-center text-muted-foreground">{t("driverTracking.loadingMap")}</div>
           ) : (
             <MapContainer
               center={DEFAULT_CENTER}
@@ -131,9 +133,9 @@ export default function DriverTrackingPage() {
                       <div className="space-y-0.5 text-muted-foreground">
                         <div>🚗 {driver.vehicle_type} · {driver.vehicle_plate}</div>
                         <div>📞 {driver.phone}</div>
-                        <div>⭐ {driver.rating} · {driver.total_deliveries} 单</div>
+                        <div>⭐ {driver.rating} · {t("driverTracking.orders", { n: driver.total_deliveries })}</div>
                         <Badge variant={driver.is_available === "true" ? "success" : "secondary"} className="mt-1">
-                          {driver.is_available === "true" ? "在线" : "离线"}
+                          {driver.is_available === "true" ? t("driverTracking.onlineDrivers") : t("drivers.offlineLabel")}
                         </Badge>
                       </div>
                       <Button
@@ -142,7 +144,7 @@ export default function DriverTrackingPage() {
                         className="w-full mt-2"
                         onClick={() => navigate(`/drivers/${driver.id}`)}
                       >
-                        查看详情
+                        {t("driverTracking.viewDetail")}
                       </Button>
                     </div>
                   </Popup>
@@ -155,11 +157,11 @@ export default function DriverTrackingPage() {
         {/* Driver List */}
         <div className="lg:col-span-1 rounded-lg border bg-card overflow-hidden" style={{ height: "calc(100vh - 240px)", minHeight: 500 }}>
           <div className="p-3 border-b bg-muted/30">
-            <h3 className="font-semibold text-sm">在线骑手列表</h3>
+            <h3 className="font-semibold text-sm">{t("driverTracking.onlineDriverList")}</h3>
           </div>
           <div className="overflow-y-auto h-[calc(100%-45px)]">
             {drivers.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">暂无在线骑手</div>
+              <div className="p-6 text-center text-sm text-muted-foreground">{t("driverTracking.noOnlineDrivers")}</div>
             ) : (
               drivers.map((driver) => (
                 <div
@@ -175,19 +177,19 @@ export default function DriverTrackingPage() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-sm">{driver.full_name}</span>
                     <Badge variant={driver.is_available === "true" ? "success" : "secondary"} className="text-[10px] px-1.5">
-                      {driver.is_available === "true" ? "在线" : "离线"}
+                      {driver.is_available === "true" ? t("drivers.online") : t("drivers.offlineLabel")}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <MapPin className="h-3 w-3" />
                     <span>
-                      {driver.current_lat?.toFixed(4)}, {driver.current_lng?.toFixed(4)}
+                      {t("driverTracking.coordinates")}: {driver.current_lat?.toFixed(4)}, {driver.current_lng?.toFixed(4)}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                     <span>{driver.vehicle_type}</span>
                     <span>⭐ {driver.rating}</span>
-                    <span>{driver.total_deliveries} 单</span>
+                    <span>{t("driverTracking.orders", { n: driver.total_deliveries })}</span>
                   </div>
                 </div>
               ))

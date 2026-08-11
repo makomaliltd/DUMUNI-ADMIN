@@ -9,6 +9,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Search, ChevronLeft, ChevronRight, Eye, Trash2, Star, Bike, Truck, Car, Navigation } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const vehicleIconMap: Record<string, React.ReactNode> = {
   "电动车": <Bike className="h-4 w-4" />,
@@ -19,6 +20,7 @@ const vehicleIconMap: Record<string, React.ReactNode> = {
 
 export default function DriversPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -51,7 +53,7 @@ export default function DriversPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm("确定要删除该骑手吗？此操作不可撤销。")) {
+    if (window.confirm(t("drivers.deleteConfirm"))) {
       deleteDriver.mutate(id);
     }
   };
@@ -67,12 +69,12 @@ export default function DriversPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">骑手管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理平台骑手，审核认证申请，查看配送状态</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("drivers.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("drivers.subtitle2")}</p>
         </div>
         <Button variant="outline" onClick={() => navigate("/drivers/tracking")}>
           <Navigation className="h-4 w-4 mr-2" />
-          实时追踪
+          {t("drivers.liveTracking")}
         </Button>
       </div>
 
@@ -81,30 +83,30 @@ export default function DriversPage() {
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="搜索姓名或手机号..."
+            placeholder={t("drivers.searchPlaceholder2")}
             className="pl-9"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
         </div>
         <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-          <SelectTrigger className="w-32"><SelectValue placeholder="认证状态" /></SelectTrigger>
+          <SelectTrigger className="w-32"><SelectValue placeholder={t("drivers.certStatus")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value=" ">全部</SelectItem>
-            <SelectItem value="approved">已认证</SelectItem>
-            <SelectItem value="pending">待认证</SelectItem>
+            <SelectItem value=" ">{t("drivers.allStatus")}</SelectItem>
+            <SelectItem value="approved">{t("drivers.verified")}</SelectItem>
+            <SelectItem value="pending">{t("drivers.pendingVerify")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={availability} onValueChange={(v) => { setAvailability(v); setPage(1); }}>
-          <SelectTrigger className="w-32"><SelectValue placeholder="在线状态" /></SelectTrigger>
+          <SelectTrigger className="w-32"><SelectValue placeholder={t("drivers.onlineStatus")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value=" ">全部</SelectItem>
-            <SelectItem value="true">在线</SelectItem>
-            <SelectItem value="false">离线</SelectItem>
+            <SelectItem value=" ">{t("drivers.allStatus")}</SelectItem>
+            <SelectItem value="true">{t("drivers.online")}</SelectItem>
+            <SelectItem value="false">{t("drivers.offlineLabel")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={vehicleType} onValueChange={(v) => { setVehicleType(v); setPage(1); }}>
-          <SelectTrigger className="w-32"><SelectValue placeholder="交通工具" /></SelectTrigger>
+          <SelectTrigger className="w-32"><SelectValue placeholder={t("drivers.vehicleType")} /></SelectTrigger>
           <SelectContent>
             <SelectItem value=" ">全部</SelectItem>
             <SelectItem value="电动车">电动车</SelectItem>
@@ -120,23 +122,23 @@ export default function DriversPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("full_name")}>姓名 <SortIcon col="full_name" /></TableHead>
-              <TableHead>手机号</TableHead>
-              <TableHead>交通工具</TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>认证 <SortIcon col="status" /></TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("is_available")}>在线 <SortIcon col="is_available" /></TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("total_deliveries")}>配送单数 <SortIcon col="total_deliveries" /></TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("rating")}>评分 <SortIcon col="rating" /></TableHead>
-              <TableHead className="text-right">操作</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("full_name")}>{t("drivers.name")} <SortIcon col="full_name" /></TableHead>
+              <TableHead>{t("drivers.phone")}</TableHead>
+              <TableHead>{t("drivers.vehicleType")}</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>{t("drivers.certStatus")} <SortIcon col="status" /></TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("is_available")}>{t("drivers.onlineStatus")} <SortIcon col="is_available" /></TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("total_deliveries")}>{t("drivers.deliveryCount")} <SortIcon col="total_deliveries" /></TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("rating")}>{t("drivers.rating")} <SortIcon col="rating" /></TableHead>
+              <TableHead className="text-right">{t("drivers.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">加载中...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">{t("drivers.loading")}</TableCell></TableRow>
             ) : error ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-12 text-red-500">加载失败</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-12 text-red-500">{t("drivers.loadFailed")}</TableCell></TableRow>
             ) : data?.data.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">暂无骑手数据</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">{t("drivers.noDriversData")}</TableCell></TableRow>
             ) : (
               data?.data.map((driver) => (
                 <TableRow key={driver.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/drivers/${driver.id}`)}>
@@ -157,12 +159,12 @@ export default function DriversPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={driver.status === "approved" ? "success" : "warning"}>
-                      {driver.status === "approved" ? "已认证" : "待认证"}
+                      {driver.status === "approved" ? t("drivers.verified") : t("drivers.pendingVerify")}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant={driver.is_available === "true" ? "success" : "secondary"}>
-                      {driver.is_available === "true" ? "在线" : "离线"}
+                      {driver.is_available === "true" ? t("drivers.online") : t("drivers.offlineLabel")}
                     </Badge>
                   </TableCell>
                   <TableCell>{driver.total_deliveries}</TableCell>
@@ -181,7 +183,7 @@ export default function DriversPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleToggleAvailability(driver)}
-                        title={driver.is_available === "true" ? "标记离线" : "标记在线"}
+                        title={driver.is_available === "true" ? t("drivers.markOffline") : t("drivers.markOnline")}
                       >
                         <Navigation className={`h-4 w-4 ${driver.is_available === "true" ? "text-green-500" : "text-muted-foreground"}`} />
                       </Button>
@@ -199,12 +201,12 @@ export default function DriversPage() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">共 {data?.total || 0} 条记录</p>
+        <p className="text-sm text-muted-foreground">{t("drivers.totalRecords", { n: data?.total || 0 })}</p>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm px-3">第 {page} / {totalPages} 页</span>
+          <span className="text-sm px-3">{t("drivers.pageOf", { n: page, m: totalPages })}</span>
           <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>

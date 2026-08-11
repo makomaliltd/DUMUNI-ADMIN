@@ -13,11 +13,13 @@ import {
   Search, Store, ChevronLeft, ChevronRight, Eye, RotateCcw,
   CheckCircle, XCircle, Loader2, Star, ChefHat, ArrowUpDown,
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import EditRestaurantModal from '@/components/EditRestaurantModal';
 
 const cuisines = ['全部', '川菜', '粤菜', '日料', '西餐', '湘菜', '鲁菜', '火锅', '烧烤', '面食', '甜品'];
 
 export default function Restaurants() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -47,16 +49,16 @@ export default function Restaurants() {
 
   const getVerifiedBadge = (v: string) => {
     switch (v) {
-      case 'verified': return <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />已验证</Badge>;
-      case 'pending': return <Badge variant="warning"><Loader2 className="w-3 h-3 mr-1" />待审核</Badge>;
-      default: return <Badge variant="secondary"><XCircle className="w-3 h-3 mr-1" />未认证</Badge>;
+      case 'verified': return <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />{t('restaurants.verified')}</Badge>;
+      case 'pending': return <Badge variant="warning"><Loader2 className="w-3 h-3 mr-1" />{t('restaurants.pending')}</Badge>;
+      default: return <Badge variant="secondary"><XCircle className="w-3 h-3 mr-1" />{t('restaurants.unverified')}</Badge>;
     }
   };
 
   const getStatusBadge = (open: string) => {
     return open === 'true'
-      ? <Badge variant="success" className="bg-emerald-500">营业中</Badge>
-      : <Badge variant="secondary">已休息</Badge>;
+      ? <Badge variant="success" className="bg-emerald-500">{t('restaurants.open')}</Badge>
+      : <Badge variant="secondary">{t('restaurants.closed')}</Badge>;
   };
 
   const SortHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
@@ -72,8 +74,8 @@ export default function Restaurants() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">餐厅管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理平台所有入驻餐厅与商家信息</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('restaurants.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('restaurants.subtitle')}</p>
         </div>
       </div>
 
@@ -84,7 +86,7 @@ export default function Restaurants() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="搜索餐厅名称..."
+                placeholder={t('restaurants.searchPlaceholder')}
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -96,9 +98,9 @@ export default function Restaurants() {
               onChange={e => { setVerified(e.target.value); setPage(1); }}
               className="h-10 px-3 rounded-lg border border-border bg-background text-sm text-foreground"
             >
-              <option value="all">全部状态</option>
-              <option value="verified">已验证</option>
-              <option value="pending">待审核</option>
+              <option value="all">{t('restaurants.allStatus')}</option>
+              <option value="verified">{t('restaurants.verified')}</option>
+              <option value="pending">{t('restaurants.pending')}</option>
             </select>
             <select
               value={cuisine}
@@ -106,10 +108,10 @@ export default function Restaurants() {
               className="h-10 px-3 rounded-lg border border-border bg-background text-sm text-foreground"
             >
               {cuisines.map(c => (
-                <option key={c} value={c === '全部' ? 'all' : c}>{c}</option>
+                <option key={c} value={c === '全部' ? 'all' : c}>{c === '全部' ? t('common.all') : c}</option>
               ))}
             </select>
-            <Button onClick={handleSearch} size="sm">搜索</Button>
+            <Button onClick={handleSearch} size="sm">{t('common.search')}</Button>
           </div>
         </CardContent>
       </Card>
@@ -117,20 +119,20 @@ export default function Restaurants() {
       {/* Table */}
       <Card>
         <CardHeader className="px-6 py-4 border-b border-border">
-          <CardTitle className="text-base font-semibold">餐厅列表</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('restaurants.restaurantList')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <SortHeader field="name">餐厅名称</SortHeader>
-                <TableHead>负责人</TableHead>
-                <TableHead>菜系</TableHead>
-                <TableHead>认证状态</TableHead>
-                <TableHead>营业状态</TableHead>
-                <SortHeader field="rating">评分</SortHeader>
-                <SortHeader field="total_orders">订单数</SortHeader>
-                <TableHead className="text-right">操作</TableHead>
+                <SortHeader field="name">{t('restaurants.name')}</SortHeader>
+                <TableHead>{t('restaurants.owner')}</TableHead>
+                <TableHead>{t('restaurants.category')}</TableHead>
+                <TableHead>{t('restaurants.verificationStatus')}</TableHead>
+                <TableHead>{t('restaurants.businessStatus')}</TableHead>
+                <SortHeader field="rating">{t('restaurants.rating')}</SortHeader>
+                <SortHeader field="total_orders">{t('restaurants.orderCount')}</SortHeader>
+                <TableHead className="text-right">{t('restaurants.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -143,7 +145,7 @@ export default function Restaurants() {
               ) : data?.data?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                    暂无餐厅数据
+                    {t('restaurants.noRestaurants')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -191,7 +193,7 @@ export default function Restaurants() {
                         <Button
                           variant="ghost" size="icon" className="w-8 h-8"
                           onClick={(e) => { e.stopPropagation(); toggleStatus.mutate(restaurant.id); }}
-                          title={restaurant.is_open === 'true' ? '打烊' : '营业'}
+                          title={restaurant.is_open === 'true' ? t('restaurants.closeShop') : t('restaurants.openShop')}
                         >
                           <RotateCcw className="w-4 h-4" />
                         </Button>
@@ -209,14 +211,14 @@ export default function Restaurants() {
       {data?.pagination && data.pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            共 {data.pagination.total} 条，第 {page}/{data.pagination.totalPages} 页
+            {t('common.total')} {data.pagination.total} {t('common.items')}, {t('common.page')} {page}/{data.pagination.totalPages}
           </p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-              <ChevronLeft className="w-4 h-4 mr-1" />上一页
+              <ChevronLeft className="w-4 h-4 mr-1" />{t('common.previous')}
             </Button>
             <Button variant="outline" size="sm" disabled={page >= (data.pagination.totalPages || 1)} onClick={() => setPage(p => p + 1)}>
-              下一页<ChevronRight className="w-4 h-4 ml-1" />
+              {t('common.next')}<ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
         </div>

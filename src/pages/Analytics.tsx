@@ -1,45 +1,52 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-export function AnalyticsPage() {
+export default function Analytics() {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">数据分析</h1>
-        <p className="text-muted-foreground">查看平台数据趋势与统计</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('analytics.title')}</h1>
+        <p className="text-muted-foreground">{t('analytics.subtitle')}</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>访问趋势</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm lg:col-span-2">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="font-semibold leading-none tracking-tight">{t('analytics.visitTrend')}</h3>
+          </div>
+          <div className="p-6 pt-0">
             <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-border">
-              <p className="text-sm text-muted-foreground">图表区域（即将上线）</p>
+              <p className="text-sm text-muted-foreground">{t('analytics.chartComingSoon')}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>数据概览</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="font-semibold leading-none tracking-tight">{t('analytics.dataOverview')}</h3>
+          </div>
+          <div className="p-6 pt-0">
             <div className="space-y-4">
-              {[
-                { label: '今日访问', value: '1,234' },
-                { label: '本周访问', value: '8,567' },
-                { label: '本月访问', value: '34,210' },
-                { label: '转化率', value: '3.2%' },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{item.label}</span>
-                  <span className="text-sm font-semibold text-foreground">{item.value}</span>
-                </div>
-              ))}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('analytics.todayVisits')}</span>
+                <span className="text-sm font-semibold text-foreground">1,234</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('analytics.weeklyVisits')}</span>
+                <span className="text-sm font-semibold text-foreground">8,567</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('analytics.monthlyVisits')}</span>
+                <span className="text-sm font-semibold text-foreground">34,210</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t('analytics.conversionRate')}</span>
+                <span className="text-sm font-semibold text-foreground">3.2%</span>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
