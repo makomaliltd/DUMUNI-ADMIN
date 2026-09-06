@@ -32,6 +32,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'login.submit': 'Sign In',
     'login.submitting': 'Signing in...',
     'login.failed': 'Login failed, please try again',
+    'login.notAdmin': 'This account does not have access to the admin panel',
 
     // Header
     'header.admin': 'Admin',
@@ -546,6 +547,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'restaurantDetail.ratingDistribution': 'Rating Distribution',
     'restaurantDetail.revenue': 'Revenue',
     'restaurantDetail.editRestaurant': 'Edit Restaurant Info',
+    'restaurantDetail.setLocation': 'Location on map',
+    'restaurantDetail.clickOnMap': 'Click on the map to set the exact position',
+    'restaurantDetail.coordinates': 'Coordinates',
     'restaurantDetail.restaurantName': 'Restaurant Name',
     'restaurantDetail.cuisine': 'Cuisine',
     'restaurantDetail.deliveryFee': 'Delivery Fee',
@@ -697,6 +701,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'driverTracking.viewDetail': 'View Detail',
     'driverTracking.orders': '{n} orders',
     'driverTracking.coordinates': 'Coordinates',
+    'driverTracking.layerTitle': 'Layers',
+    'driverTracking.layerAll': 'All',
+    'driverTracking.layerDrivers': 'Drivers',
+    'driverTracking.layerRestaurants': 'Restaurants',
+    'driverTracking.noRestaurants': 'No restaurants on the map',
+    'driverTracking.restaurantList': 'Restaurants',
 
     // Driver Applications
     'driverApplications.title': 'Driver Applications',
@@ -1054,6 +1064,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'login.submit': '登录',
     'login.submitting': '登录中...',
     'login.failed': '登录失败，请重试',
+    'login.notAdmin': '该账号没有管理后台访问权限',
 
     // Header
     'header.admin': '管理员',
@@ -1636,6 +1647,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'restaurantDetail.ratingDistribution': '评分分布',
     'restaurantDetail.revenue': '收入',
     'restaurantDetail.editRestaurant': '编辑餐厅信息',
+    'restaurantDetail.setLocation': '在地图上定位',
+    'restaurantDetail.clickOnMap': '点击地图设置准确位置',
+    'restaurantDetail.coordinates': '坐标',
     'restaurantDetail.restaurantName': '餐厅名称',
     'restaurantDetail.cuisine': '菜系',
     'restaurantDetail.deliveryFee': '配送费',
@@ -1787,6 +1801,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'driverTracking.viewDetail': '查看详情',
     'driverTracking.orders': '{n} 单',
     'driverTracking.coordinates': '坐标',
+    'driverTracking.layerTitle': '图层',
+    'driverTracking.layerAll': '全部',
+    'driverTracking.layerDrivers': '骑手',
+    'driverTracking.layerRestaurants': '餐厅',
+    'driverTracking.noRestaurants': '地图上暂无餐厅',
+    'driverTracking.restaurantList': '餐厅列表',
 
     // Driver Applications
     'driverApplications.title': '骑手申请',
@@ -2147,6 +2167,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'login.submit': 'Se connecter',
     'login.submitting': 'Connexion...',
     'login.failed': 'Échec de connexion, veuillez réessayer',
+    'login.notAdmin': 'Ce compte n\'a pas accès au panneau d\'administration',
 
     // Header
     'header.admin': 'Admin',
@@ -2729,6 +2750,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'restaurantDetail.ratingDistribution': 'Distribution des notes',
     'restaurantDetail.revenue': 'Revenus',
     'restaurantDetail.editRestaurant': 'Modifier les infos du restaurant',
+    'restaurantDetail.setLocation': 'Localisation sur la carte',
+    'restaurantDetail.clickOnMap': 'Cliquez sur la carte pour définir la position exacte',
+    'restaurantDetail.coordinates': 'Coordonnées',
     'restaurantDetail.restaurantName': 'Nom du restaurant',
     'restaurantDetail.cuisine': 'Cuisine',
     'restaurantDetail.deliveryFee': 'Frais de livraison',
@@ -2880,6 +2904,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'driverTracking.viewDetail': 'Voir détails',
     'driverTracking.orders': '{n} commandes',
     'driverTracking.coordinates': 'Coordonnées',
+    'driverTracking.layerTitle': 'Couches',
+    'driverTracking.layerAll': 'Tout',
+    'driverTracking.layerDrivers': 'Livreurs',
+    'driverTracking.layerRestaurants': 'Restaurants',
+    'driverTracking.noRestaurants': 'Aucun restaurant sur la carte',
+    'driverTracking.restaurantList': 'Liste des restaurants',
 
     // Driver Applications
     'driverApplications.title': 'Candidatures livreurs',

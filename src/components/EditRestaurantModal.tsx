@@ -7,12 +7,77 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin, Store } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   restaurantId: string;
+}
+
+// Centre par défaut : Bamako (Mali)
+const BAMAKO: [number, number] = [12.6392, -8.0029];
+
+const pickIcon = L.divIcon({
+  className: 'location-pick-marker',
+  html: `<div style="
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #f97316; border: 3px solid white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  ">📍</div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
+
+function ClickCatcher({ onPick }: { onPick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onPick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
+function Recenter({ lat, lng }: { lat: number | null; lng: number | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (lat != null && lng != null) {
+      map.flyTo([lat, lng], 15, { duration: 0.6 });
+    }
+  }, [lat, lng, map]);
+  return null;
+}
+
+function LocationPicker({
+  lat,
+  lng,
+  onChange,
+}: {
+  lat: number | null;
+  lng: number | null;
+  onChange: (lat: number, lng: number) => void;
+}) {
+  const center: [number, number] =
+    lat != null && lng != null ? [lat, lng] : BAMAKO;
+  return (
+    <div className="relative rounded-lg overflow-hidden border" style={{ height: 220 }}>
+      <MapContainer center={center} zoom={lat != null ? 15 : 12} style={{ height: '100%', width: '100%' }}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <ClickCatcher onPick={onChange} />
+        <Recenter lat={lat} lng={lng} />
+        {lat != null && lng != null ? <Marker position={[lat, lng]} icon={pickIcon} /> : null}
+      </MapContainer>
+    </div>
+  );
 }
 
 export default function EditRestaurantModal({ open, onOpenChange, restaurantId }: Props) {
@@ -23,6 +88,8 @@ export default function EditRestaurantModal({ open, onOpenChange, restaurantId }
     name: '', description: '', address: '', phone: '', hours: '',
     cuisine_type: '', delivery_fee: '', min_order: '',
   });
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
 
   useEffect(() => {
     if (restaurantRes?.data) {
@@ -37,17 +104,22 @@ export default function EditRestaurantModal({ open, onOpenChange, restaurantId }
         delivery_fee: r.delivery_fee || '',
         min_order: r.min_order || '',
       });
+      const rLat = r.latitude != null ? Number(r.latitude) : null;
+      const rLng = r.longitude != null ? Number(r.longitude) : null;
+      setLat(rLat);
+      setLng(rLng);
     }
   }, [restaurantRes?.data]);
 
   const handleSubmit = async () => {
-    await updateRestaurant.mutateAsync({ id: restaurantId, data: form });
+    const payload = { ...form, latitude: lat, longitude: lng };
+    await updateRestaurant.mutateAsync({ id: restaurantId, data: payload });
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t('restaurantDetail.editRestaurant')}</DialogTitle>
         </DialogHeader>
@@ -88,6 +160,29 @@ export default function EditRestaurantModal({ open, onOpenChange, restaurantId }
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('restaurantDetail.minOrder')}</label>
                 <Input value={form.min_order} onChange={e => setForm(f => ({ ...f, min_order: e.target.value }))} />
               </div>
+            </div>
+
+            {/* Position sur la carte */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" /> {t('restaurantDetail.setLocation')}
+              </label>
+              <LocationPicker
+                lat={lat}
+                lng={lng}
+                onChange={(newLat, newLng) => {
+                  setLat(Number(newLat.toFixed(6)));
+                  setLng(Number(newLng.toFixed(6)));
+                }}
+              />
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <Store className="w-3 h-3 text-orange-500" />
+                {t('restaurantDetail.clickOnMap')}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('restaurantDetail.coordinates')}:{' '}
+                {lat != null && lng != null ? `${lat.toFixed(6)}, ${lng.toFixed(6)}` : '—'}
+              </p>
             </div>
           </div>
         )}

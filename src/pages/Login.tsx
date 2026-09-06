@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { AUTH_NOT_ADMIN, useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ export function LoginPage() {
     try {
       const result = await login(email, password);
       if (result.error) {
-        setError(result.error);
+        setError(result.error === AUTH_NOT_ADMIN ? t('login.notAdmin') : result.error);
       } else {
         navigate(from, { replace: true });
       }

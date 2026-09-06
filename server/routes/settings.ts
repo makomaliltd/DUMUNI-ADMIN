@@ -3,16 +3,22 @@ import { getSupabaseClient } from '../src/storage/database/supabase-client';
 
 const router = Router();
 
-// ======== Platform Settings (Key-Value) ========
+// ─── Correspondances avec le schéma réel ───────────────────────────────────
+// - Paramètres plateforme : `platform_settings` (key, value, description, category)
+// - Rôles admin           : `admin_roles` (user_id, role_name, permissions jsonb)
+// - Utilisateurs admin    : `users` + `admin_roles`
+// - Journaux d'activité / modèles d'e-mail : AUCUNE table → réponses vides
+const db = () => getSupabaseClient();
+
+// ═══════════════ Platform settings ═══════════════
 
 router.get('/api/settings', async (_req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase.from('platform_settings').select('*');
+    const { data, error } = await db().from('platform_settings').select('key,value,description,category');
     if (error) throw error;
-    const settings: Record<string, string> = {};
-    (data || []).forEach((s: any) => { settings[s.key] = s.value; });
-    res.json({ success: true, data: settings });
+    const out: Record<string, string> = {};
+    (data || []).forEach((s: any) => { out[s.key] = s.value; });
+    res.json({ success: true, data: out });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -20,37 +26,54 @@ router.get('/api/settings', async (_req: Request, res: Response) => {
 
 router.put('/api/settings', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const updates = req.body;
-    const results: any[] = [];
+    const updates = (req.body || {}) as Record<string, string>;
+    const results = [];
     for (const [key, value] of Object.entries(updates)) {
-      const { data, error } = await supabase.from('platform_settings').upsert(
-        { key, value: String(value), updated_at: new Date().toISOString() },
-        { onConflict: 'key' }
-      ).select();
-      if (error) throw error;
-      results.push(data);
+      const { data: existing } = await db().from('platform_settings').select('id').eq('key', key).maybeSingle();
+      if (existing) {
+        const { data, error } = await db()
+          .from('platform_settings')
+          .update({ value: String(value), updated_at: new Date().toISOString() })
+          .eq('key', key)
+          .select()
+          .single();
+        if (error) throw error;
+        results.push(data);
+      } else {
+        const { data, error } = await db()
+          .from('platform_settings')
+          .insert({ key, value: String(value), description: key, category: 'platform', updated_at: new Date().toISOString() })
+          .select()
+          .single();
+        if (error) throw error;
+        results.push(data);
+      }
     }
-    // Log the action
-    await supabase.from('activity_logs').insert({
-      action: 'settings_update',
-      entity_type: 'settings',
-      details: { updated_keys: Object.keys(updates) },
-    });
     res.json({ success: true, data: results });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// ======== Admin Roles ========
+// ═══════════════ Admin roles ═══════════════
 
 router.get('/api/settings/admin-roles', async (_req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase.from('admin_roles').select('*').order('role_name');
+    const { data, error } = await db().from('admin_roles').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    res.json({ success: true, data: data || [] });
+
+    const ids = Array.from(new Set((data || []).map((r: any) => r.user_id).filter(Boolean)));
+    const userMap = new Map<string, any>();
+    if (ids.length) {
+      const { data: users } = await db().from('users').select('id,name,email,phone').in('id', ids);
+      (users || []).forEach((u: any) => userMap.set(u.id, u));
+    }
+    const rows = (data || []).map((r: any) => ({
+      ...r,
+      user_name: userMap.get(r.user_id)?.name || null,
+      email: userMap.get(r.user_id)?.email || null,
+    }));
+    res.json({ success: true, data: rows });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -58,11 +81,13 @@ router.get('/api/settings/admin-roles', async (_req: Request, res: Response) => 
 
 router.post('/api/settings/admin-roles', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { name, description, permissions } = req.body;
-    const { data, error } = await supabase.from('admin_roles').insert({
-      name, description, permissions: permissions || {},
-    }).select().single();
+    const { user_id, role_name, permissions } = req.body || {};
+    if (!role_name) return res.status(400).json({ success: false, error: 'role_name is required' });
+    const { data, error } = await db()
+      .from('admin_roles')
+      .insert({ user_id: user_id || null, role_name, permissions: permissions || {}, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .select()
+      .single();
     if (error) throw error;
     res.json({ success: true, data });
   } catch (err: any) {
@@ -72,11 +97,12 @@ router.post('/api/settings/admin-roles', async (req: Request, res: Response) => 
 
 router.put('/api/settings/admin-roles/:id', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { name, description, permissions } = req.body;
-    const { data, error } = await supabase.from('admin_roles').update({
-      name, description, permissions, updated_at: new Date().toISOString(),
-    }).eq('id', req.params.id).select().single();
+    const { role_name, permissions, user_id } = req.body || {};
+    const update: any = { updated_at: new Date().toISOString() };
+    if (role_name !== undefined) update.role_name = role_name;
+    if (permissions !== undefined) update.permissions = permissions;
+    if (user_id !== undefined) update.user_id = user_id;
+    const { data, error } = await db().from('admin_roles').update(update).eq('id', req.params.id).select().single();
     if (error) throw error;
     res.json({ success: true, data });
   } catch (err: any) {
@@ -86,8 +112,7 @@ router.put('/api/settings/admin-roles/:id', async (req: Request, res: Response) 
 
 router.delete('/api/settings/admin-roles/:id', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from('admin_roles').delete().eq('id', req.params.id);
+    const { error } = await db().from('admin_roles').delete().eq('id', req.params.id);
     if (error) throw error;
     res.json({ success: true });
   } catch (err: any) {
@@ -95,36 +120,37 @@ router.delete('/api/settings/admin-roles/:id', async (req: Request, res: Respons
   }
 });
 
-// ======== Admin Users ========
+// ═══════════════ Admin users (users + admin_roles) ═══════════════
 
 router.get('/api/settings/admin-users', async (_req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    // Fetch admin users
-    const { data: adminUsers, error: usersError } = await supabase
-      .from('admin_users')
-      .select('*, admin_roles!role_id(name, description, permissions)')
-      .order('created_at', { ascending: false });
-    if (usersError) throw usersError;
-
-    // Fetch profiles separately for each admin user
-    const userIds = (adminUsers || []).filter((u: any) => u.user_id).map((u: any) => u.user_id);
-    let profiles: any[] = [];
-    if (userIds.length > 0) {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, avatar_url')
-        .in('id', userIds);
-      profiles = profileData || [];
+    const { data: roles, error } = await db().from('admin_roles').select('*');
+    if (error) throw error;
+    const ids = Array.from(new Set((roles || []).map((r: any) => r.user_id).filter(Boolean)));
+    const userMap = new Map<string, any>();
+    if (ids.length) {
+      const { data: users } = await db().from('users').select('id,name,email,phone,avatar_url,is_active,created_at').in('id', ids);
+      (users || []).forEach((u: any) => userMap.set(u.id, u));
     }
-
-    // Merge profiles into admin users
-    const enriched = (adminUsers || []).map((au: any) => ({
-      ...au,
-      profiles: profiles.find((p: any) => p.id === au.user_id) || null,
-    }));
-
-    res.json({ success: true, data: enriched });
+    const rows = (roles || []).map((r: any) => {
+      const u = userMap.get(r.user_id);
+      return {
+        id: r.id,
+        user_id: r.user_id,
+        role_id: r.id,
+        name: u?.name || null,
+        full_name: u?.name || null,
+        email: u?.email || null,
+        phone: u?.phone || null,
+        avatar_url: u?.avatar_url || null,
+        role: r.role_name,
+        role_name: r.role_name,
+        permissions: r.permissions,
+        is_active: u?.is_active ?? true,
+        created_at: r.created_at,
+      };
+    });
+    res.json({ success: true, data: rows });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -132,11 +158,33 @@ router.get('/api/settings/admin-users', async (_req: Request, res: Response) => 
 
 router.post('/api/settings/admin-users', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { user_id, role_id } = req.body;
-    const { data, error } = await supabase.from('admin_users').insert({
-      user_id, role_id, is_active: true,
-    }).select().single();
+    const { user_id, email, role, role_name, permissions, name } = req.body || {};
+
+    let uid = user_id;
+    if (!uid && email) {
+      const { data: users } = await db().from('users').select('id').eq('email', email).limit(1);
+      uid = users?.[0]?.id;
+    }
+    if (!uid && !name) {
+      return res.status(400).json({ success: false, error: 'user_id, email or name is required' });
+    }
+    if (!uid) {
+      const { data: users } = await db().from('users').select('id').ilike('name', `%${name}%`).limit(1);
+      uid = users?.[0]?.id;
+    }
+    if (!uid) return res.status(404).json({ success: false, error: 'User not found' });
+
+    const { data, error } = await db()
+      .from('admin_roles')
+      .insert({
+        user_id: uid,
+        role_name: role || role_name || 'admin',
+        permissions: permissions || {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
     if (error) throw error;
     res.json({ success: true, data });
   } catch (err: any) {
@@ -146,11 +194,11 @@ router.post('/api/settings/admin-users', async (req: Request, res: Response) => 
 
 router.put('/api/settings/admin-users/:id', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { role_id, is_active } = req.body;
-    const { data, error } = await supabase.from('admin_users').update({
-      role_id, is_active, updated_at: new Date().toISOString(),
-    }).eq('id', req.params.id).select().single();
+    const { role, role_name, permissions } = req.body || {};
+    const update: any = { updated_at: new Date().toISOString() };
+    if (role_name || role) update.role_name = role_name || role;
+    if (permissions !== undefined) update.permissions = permissions;
+    const { data, error } = await db().from('admin_roles').update(update).eq('id', req.params.id).select().single();
     if (error) throw error;
     res.json({ success: true, data });
   } catch (err: any) {
@@ -160,8 +208,7 @@ router.put('/api/settings/admin-users/:id', async (req: Request, res: Response) 
 
 router.delete('/api/settings/admin-users/:id', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from('admin_users').delete().eq('id', req.params.id);
+    const { error } = await db().from('admin_roles').delete().eq('id', req.params.id);
     if (error) throw error;
     res.json({ success: true });
   } catch (err: any) {
@@ -169,104 +216,52 @@ router.delete('/api/settings/admin-users/:id', async (req: Request, res: Respons
   }
 });
 
-// ======== Email Templates ========
+// ═══════════════ Email templates (aucune table) ═══════════════
 
 router.get('/api/settings/email-templates', async (_req: Request, res: Response) => {
-  try {
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase.from('email_templates').select('*').order('name');
-    if (error) throw error;
-    res.json({ success: true, data: data || [] });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+  res.json({ success: true, data: [] });
 });
-
 router.put('/api/settings/email-templates/:id', async (req: Request, res: Response) => {
-  try {
-    const supabase = getSupabaseClient();
-    const { subject, body, variables } = req.body;
-    const { data, error } = await supabase.from('email_templates').update({
-      subject, body, variables, updated_at: new Date().toISOString(),
-    }).eq('id', req.params.id).select().single();
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+  res.json({ success: true, data: { id: req.params.id, ...req.body } });
 });
 
-// ======== Activity Logs ========
+// ═══════════════ Activity logs (aucune table) ═══════════════
 
-router.get('/api/settings/activity-logs', async (req: Request, res: Response) => {
-  try {
-    const supabase = getSupabaseClient();
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 20;
-    const offset = (page - 1) * pageSize;
-    const adminId = req.query.admin_id as string;
-    const action = req.query.action as string;
-    const startDate = req.query.start_date as string;
-    const endDate = req.query.end_date as string;
-
-    let query = supabase.from('activity_logs').select('*', { count: 'exact' });
-    if (adminId) query = query.eq('admin_id', adminId);
-    if (action) query = query.eq('action', action);
-    if (startDate) query = query.gte('created_at', startDate);
-    if (endDate) query = query.lte('created_at', endDate);
-
-    const { data, count, error } = await query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + pageSize - 1);
-    if (error) throw error;
-    res.json({ success: true, data: data || [], total: count || 0 });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+router.get('/api/settings/activity-logs', async (_req: Request, res: Response) => {
+  res.json({ success: true, data: [], total: 0, pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 } });
 });
-
 router.delete('/api/settings/activity-logs', async (_req: Request, res: Response) => {
-  try {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from('activity_logs').delete().lt('created_at', new Date(Date.now() - 90*86400000).toISOString());
-    if (error) throw error;
-    res.json({ success: true, message: 'Old logs cleaned up' });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+  res.json({ success: true });
 });
 
-// ======== Profiles (for admin user selection) ========
+// ═══════════════ Profiles (recherche d'utilisateurs) ═══════════════
 
 router.get('/api/settings/profiles', async (req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
     const search = req.query.search as string;
-    let query = supabase.from('profiles').select('id, full_name, email, role').neq('role', 'admin');
-    if (search) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
-    const { data, error } = await query.limit(20);
+    let query: any = db().from('users').select('id,name,email,phone,avatar_url,role,created_at');
+    if (search) query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(50);
     if (error) throw error;
-    res.json({ success: true, data: data || [] });
+    const rows = (data || []).map((u: any) => ({ ...u, full_name: u.name }));
+    res.json({ success: true, data: rows });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// ======== Health Check / Maintenance ========
+// ═══════════════ Health check ═══════════════
 
 router.get('/api/settings/health-check', async (_req: Request, res: Response) => {
   try {
-    const supabase = getSupabaseClient();
-    const start = Date.now();
-    const { data, error } = await supabase.from('health_check').select('*').limit(1);
-    const dbLatency = Date.now() - start;
+    const started = Date.now();
+    const { error } = await db().from('users').select('id').limit(1);
     res.json({
       success: true,
       data: {
-        status: error ? 'degraded' : 'healthy',
-        database: error ? 'error' : 'connected',
-        db_latency_ms: dbLatency,
-        server_uptime: process.uptime(),
+        status: error ? 'error' : 'ok',
+        database: error ? 'disconnected' : 'connected',
+        responseTime: Date.now() - started,
         timestamp: new Date().toISOString(),
       },
     });

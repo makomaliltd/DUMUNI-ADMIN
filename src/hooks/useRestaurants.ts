@@ -17,6 +17,8 @@ export interface Restaurant {
   min_order: string | null;
   rating: string | null;
   review_count: number;
+  latitude: number | null;
+  longitude: number | null;
   is_open: string;
   verified: string;
   total_orders: number;

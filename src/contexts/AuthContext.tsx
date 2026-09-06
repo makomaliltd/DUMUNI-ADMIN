@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useSupabaseConfig } from '@/lib/supabase-config-inject';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { apiUrl } from '@/lib/api';
 import type { User, UserRole } from '@/types';
 
 interface AuthContextType {
@@ -23,17 +23,33 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
-function mapSupabaseUser(sbUser: import('@supabase/supabase-js').User): User {
-  const metadata = sbUser.user_metadata || {};
-  return {
-    id: sbUser.id,
-    email: sbUser.email,
-    phone: sbUser.phone,
-    fullName: metadata.full_name || metadata.name || sbUser.email?.split('@')[0] || 'User',
-    avatarUrl: metadata.avatar_url || null,
-    role: (metadata.role || 'admin') as UserRole,
-    createdAt: sbUser.created_at,
-  };
+interface BackendMeResponse {
+  user: User;
+}
+
+/** Error code returned by login() when the account is not an admin */
+export const AUTH_NOT_ADMIN = 'AUTH_NOT_ADMIN';
+
+async function fetchAdminProfile(accessToken: string): Promise<User | null> {
+  try {
+    const res = await fetch(apiUrl('/api/auth/me'), {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (res.status === 403) return null;
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+
+    const { user } = (await res.json()) as BackendMeResponse;
+    return user;
+  } catch (err) {
+    console.error('Failed to load admin profile:', err);
+    return null;
+  }
 }
 
 interface AuthProviderProps {
@@ -44,10 +60,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { config, isLoading: configLoading } = useSupabaseConfig();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const getClient = useCallback((): SupabaseClient | null => {
-    return getSupabaseBrowserClient();
-  }, []);
 
   useEffect(() => {
     if (configLoading) return;
@@ -65,15 +77,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         const { data: { session } } = await supabase.auth.getSession();
 
-        if (session?.user) {
-          const mappedUser = mapSupabaseUser(session.user);
-          setUser(mappedUser);
+        if (session?.access_token) {
+          const profile = await fetchAdminProfile(session.access_token);
+          setUser(profile);
+          if (!profile) {
+            await supabase.auth.signOut().catch(() => {});
+          }
         }
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (_event, session) => {
-            if (session?.user) {
-              setUser(mapSupabaseUser(session.user));
+          (_event, nextSession) => {
+            if (nextSession?.access_token) {
+              fetchAdminProfile(nextSession.access_token).then((profile) => {
+                setUser(profile);
+                if (!profile) {
+                  supabase.auth.signOut().catch(() => {});
+                }
+              });
             } else {
               setUser(null);
             }
@@ -110,9 +130,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { error: error.message };
       }
 
-      if (data.session?.user) {
-        setUser(mapSupabaseUser(data.session.user));
+      if (!data.session?.access_token) {
+        return { error: '登录失败，请重试' };
       }
+
+      const profile = await fetchAdminProfile(data.session.access_token);
+      if (!profile) {
+        await supabase.auth.signOut().catch(() => {});
+        return { error: AUTH_NOT_ADMIN };
+      }
+      setUser(profile);
 
       return {};
     } catch (err) {

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import supabaseConfigRouter from './supabase-config';
+import authRouter from './auth';
 import usersRouter from './users';
 import restaurantsRouter from './restaurants';
 import driversRouter from './drivers';
@@ -13,6 +14,9 @@ const router = Router();
 
 // Supabase config route
 router.use(supabaseConfigRouter);
+
+// Auth verification route
+router.use(authRouter);
 
 // User management routes
 router.use(usersRouter);
