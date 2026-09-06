@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AUTH_NOT_ADMIN, useAuth } from '@/contexts/AuthContext';
+import { useSupabaseConfig } from '@/lib/supabase-config-inject';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ export function LoginPage() {
   const location = useLocation();
   const { login, isAuthenticated } = useAuth();
   const { t } = useLanguage();
+  const { config: supabaseConfig, isLoading: supabaseLoading, error: supabaseError } = useSupabaseConfig();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -73,6 +75,22 @@ export function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!supabaseLoading && !supabaseConfig && (
+              <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm text-amber-800 dark:text-amber-300">
+                <p className="font-semibold">Supabase non configuré sur le serveur</p>
+                <p className="mt-1">
+                  Ajoutez ces variables d&apos;environnement au déploiement (Vercel → Settings → Environment
+                  Variables) puis redéployez :
+                </p>
+                <ul className="mt-1 list-disc pl-5 font-mono text-xs">
+                  <li>COZE_SUPABASE_URL=https://yceaiqiovpcockhwzfev.supabase.co</li>
+                  <li>COZE_SUPABASE_ANON_KEY=…</li>
+                  <li>COZE_SUPABASE_SERVICE_ROLE_KEY=…</li>
+                </ul>
+                {supabaseError && <p className="mt-1 text-xs">Détail serveur : {supabaseError}</p>}
+              </div>
+            )}
+
             {error && (
               <div className="rounded-lg bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-600 dark:text-red-400">
                 {error}
@@ -128,7 +146,12 @@ export function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={isSubmitting || (!supabaseLoading && !supabaseConfig)}
+            >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
