@@ -19,6 +19,7 @@ const AnalyticsPage = lazy(() => import('@/pages/Analytics'));
 const ContentPage = lazy(() => import('@/pages/Content'));
 const OrdersPage = lazy(() => import('@/pages/Orders'));
 const OrderDetailPage = lazy(() => import('@/pages/OrderDetail'));
+const ConversationsPage = lazy(() => import('@/pages/Conversations'));
 const FinancePage = lazy(() => import('@/pages/Finance'));
 const ReportsPage = lazy(() => import('@/pages/Reports'));
 const RestaurantsPage = lazy(() => import('@/pages/Restaurants'));
@@ -82,6 +83,7 @@ function AppContent() {
         <Route path="content" element={<Suspense fallback={<PageLoading />}><ContentPage /></Suspense>} />
         <Route path="orders" element={<Suspense fallback={<PageLoading />}><OrdersPage /></Suspense>} />
         <Route path="orders/:id" element={<Suspense fallback={<PageLoading />}><OrderDetailPage /></Suspense>} />
+        <Route path="conversations" element={<Suspense fallback={<PageLoading />}><ConversationsPage /></Suspense>} />
         <Route path="finance" element={<Suspense fallback={<PageLoading />}><FinancePage /></Suspense>} />
         <Route path="reports" element={<Suspense fallback={<PageLoading />}><ReportsPage /></Suspense>} />
         <Route path="restaurants" element={<Suspense fallback={<PageLoading />}><RestaurantsPage /></Suspense>} />

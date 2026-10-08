@@ -5,6 +5,7 @@ import usersRouter from './users';
 import restaurantsRouter from './restaurants';
 import driversRouter from './drivers';
 import ordersRouter from './orders';
+import conversationsRouter from './conversations';
 import financeRouter from './finance';
 import contentRouter from './content';
 import reportsRouter from './reports';
@@ -29,6 +30,9 @@ router.use(driversRouter);
 
 // Order management routes
 router.use(ordersRouter);
+
+// Buyer <-> seller conversations routes
+router.use('/api/conversations', conversationsRouter);
 
 // Financial management routes
 router.use(financeRouter);
