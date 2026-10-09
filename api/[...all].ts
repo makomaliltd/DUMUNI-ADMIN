@@ -1,5 +1,4 @@
 import express, { type Request, type Response, type NextFunction } from 'express';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import serverRouter from '../server/routes';
 
 const app = express();
@@ -29,6 +28,8 @@ app.use('*', (_req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Not found' });
 });
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  return app(req as unknown as Request, res as unknown as Response);
+// Handler serverless Vercel. Les types @vercel/node ne sont pas dépendants du
+// projet : on type en entrée/sortie Express et on délègue à l'app.
+export default function handler(req: unknown, res: unknown) {
+  return app(req as Request, res as Response);
 }
