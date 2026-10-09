@@ -2,11 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm vite build",
   "outputDirectory": "dist",
-  "installCommand": "pnpm install --prefer-frozen-lockfile --prefer-offline",
+  "installCommand": "pnpm install --prefer-frozen-lockfile --prefer-offline --prod=false",
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/((?!assets/|_vercel/|favicon\\.ico).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|assets/|_vercel/|favicon\\.ico).*)", "destination": "/index.html" }
   ]
 }
