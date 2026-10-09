@@ -22,14 +22,38 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+/**
+ * Vercel ne route vers cette fonction que les chemins `api/` d'un seul segment.
+ * `vercel.json` réécrit donc `/api/<reste>` en `/api/all?p=<reste>` ; on
+ * reconstruit ici l'URL d'origine avant de la confier au router Express.
+ */
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  const raw = req.url || '';
+  const sep = raw.indexOf('?');
+  const query = sep >= 0 ? raw.slice(sep + 1) : '';
+  const rest = query
+    .split('&')
+    .find((part) => part.startsWith('p='))
+    ?.slice(2);
+
+  if (rest) {
+    const decoded = decodeURIComponent(rest);
+    const kept = query
+      .split('&')
+      .filter((part) => part && !part.startsWith('p='))
+      .join('&');
+    req.url = `/api/${decoded.replace(/^\//, '')}${kept ? `?${kept}` : ''}`;
+  }
+  next();
+});
+
 app.use(serverRouter);
 
 app.use('*', (_req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Not found' });
 });
 
-// Handler serverless Vercel. Les types @vercel/node ne sont pas dépendants du
-// projet : on type en entrée/sortie Express et on délègue à l'app.
+// Handler serverless Vercel : typage Express, délégation à l'app.
 export default function handler(req: unknown, res: unknown) {
   return app(req as Request, res as Response);
 }

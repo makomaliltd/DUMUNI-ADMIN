@@ -5,6 +5,7 @@
   "installCommand": "pnpm install --prefer-frozen-lockfile --prefer-offline --prod=false",
   "framework": null,
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/all?p=$1" },
     { "source": "/((?!api/|assets/|_vercel/|favicon\\.ico).*)", "destination": "/index.html" }
   ]
 }
