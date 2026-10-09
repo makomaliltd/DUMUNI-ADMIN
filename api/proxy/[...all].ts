@@ -1,0 +1,43 @@
+import express, { type Request, type Response, type NextFunction } from 'express';
+import serverRouter from '../../server/routes';
+
+const app = express();
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-session');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  next();
+});
+
+// Le front appelle /api/proxy/... : on retire le préfixe avant de déléguer au router.
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  if (req.url.startsWith('/api/proxy')) {
+    req.url = `/api${req.url.slice('/api/proxy'.length)}`;
+  }
+  next();
+});
+
+app.use(serverRouter);
+
+app.use('*', (_req: Request, res: Response) => {
+  res.status(404).json({ success: false, error: 'Not found' });
+});
+
+// Handler serverless Vercel. Les types @vercel/node ne sont pas dépendants du
+// projet : on type en entrée/sortie Express et on délègue à l'app.
+export default function handler(req: unknown, res: unknown) {
+  return app(req as Request, res as Response);
+}
